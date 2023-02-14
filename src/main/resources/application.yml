@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;database=BD20230209RCC;trustServerCertificate=true
+    # set your own credentials
+    username: rober
+    password: superhardpass12
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database: sql_server
+
