@@ -1,6 +1,5 @@
 package com.example.RCCC03.customer.model;
 
-import com.example.RCCC03.auth.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-@Entity(name = "customers")
+@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,7 +25,6 @@ public class Customer {
     private String email;
     private String phone;
     private LocalDateTime created_at;
-    private boolean status;
 
     /*
     @OneToMany

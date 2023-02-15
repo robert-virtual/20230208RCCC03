@@ -46,7 +46,6 @@ public class AuthService {
                .phone(registerRequest.getPhone())
                .email(registerRequest.getEmail())
                .created_at(LocalDateTime.now())
-               .status(true)
                .lastname(registerRequest.getLastname())
                .build();
         long customer_id = customerRepository.save(customer).getId();
