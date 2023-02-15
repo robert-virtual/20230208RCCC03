@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    private static final String ACCESS_TOKEN_SECRET = "";
+    private static final String ACCESS_TOKEN_SECRET = "472B4B6150645367566B5970337336763979244226452948404D635165546857";
     private static final int ACCESS_TOKEN_EXPIRATION_MILLISECONDS = 1000*60;
 
     public Date extractExpiration(String jwt){

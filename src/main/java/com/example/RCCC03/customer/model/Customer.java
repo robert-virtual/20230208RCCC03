@@ -1,29 +1,25 @@
 package com.example.RCCC03.customer.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.example.RCCC03.auth.model.User;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 
-@Entity
+@Entity(name = "customers")
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class Customer {
 
-    public Customer(){
-        this.created_at = LocalDateTime.now();
-        this.status = true;
-    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
     private String name;
     private String lastname;
     private Date birthdate;
@@ -32,5 +28,9 @@ public class Customer {
     private LocalDateTime created_at;
     private boolean status;
 
+    /*
+    @OneToMany
+    private List<User> users;
+    */
 
 }

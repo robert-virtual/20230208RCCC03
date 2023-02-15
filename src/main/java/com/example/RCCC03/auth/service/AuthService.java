@@ -13,6 +13,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -30,7 +32,7 @@ public class AuthService {
                        loginRequest.getPassword()
                )
        );
-       var user = userRepository.findByeEmail(loginRequest.getEmail()).orElseThrow();
+       var user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow();
        var jwt = jwtService.generateToken(user);
        return AuthResponse.builder()
                .token(jwt)
@@ -43,13 +45,20 @@ public class AuthService {
                .birthdate(registerRequest.getBirthdate())
                .phone(registerRequest.getPhone())
                .email(registerRequest.getEmail())
+               .created_at(LocalDateTime.now())
+               .status(true)
                .lastname(registerRequest.getLastname())
                .build();
-        int customer_id = customerRepository.save(customer).getId();
+        long customer_id = customerRepository.save(customer).getId();
+        //Customer db_customer = customerRepository.findById(customer_id).orElseThrow();
+        System.out.println("customer id: "+customer_id);
         var user = User.builder()
                 .customer_id(customer_id)
                 .email(registerRequest.getEmail())
                 .role(registerRequest.getRole())
+                .created_at(LocalDateTime.now())
+                .failed_logins(0)
+                .status(true)
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .build();
         userRepository.save(user);

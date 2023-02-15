@@ -1,12 +1,11 @@
 package com.example.RCCC03.auth.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.example.RCCC03.customer.model.Customer;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,12 +19,8 @@ import java.util.List;
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class User implements UserDetails {
-    public User(){
-        this.status = true;
-        this.failed_logins = 0;
-        this.created_at = LocalDateTime.now();
-    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -35,7 +30,14 @@ public class User implements UserDetails {
     private String password;
     private String email;
     private int failed_logins;
+
+/*
+    @ManyToOne
+    @JoinColumn(name="id")
+    private Customer customer;
+* */
     private long customer_id;
+
     private boolean status;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
