@@ -21,9 +21,14 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class User implements UserDetails {
+    public User(){
+        this.status = true;
+        this.failed_logins = 0;
+        this.created_at = LocalDateTime.now();
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-   private long id;
+    private long id;
     private int role;
     private String otp;
     private LocalDateTime otp_expires_in;
