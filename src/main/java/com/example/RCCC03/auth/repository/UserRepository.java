@@ -1,4 +1,4 @@
-package com.example.RCCC03.auth;
+package com.example.RCCC03.auth.repository;
 
 
 import com.example.RCCC03.auth.model.User;

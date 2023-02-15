@@ -1,6 +1,6 @@
 package com.example.RCCC03.config;
 
-import com.example.RCCC03.auth.UserRepository;
+import com.example.RCCC03.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

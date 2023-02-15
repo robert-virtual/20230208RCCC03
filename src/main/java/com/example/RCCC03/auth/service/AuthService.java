@@ -1,11 +1,12 @@
-package com.example.RCCC03.auth;
+package com.example.RCCC03.auth.service;
 
+import com.example.RCCC03.auth.repository.UserRepository;
 import com.example.RCCC03.auth.model.AuthResponse;
 import com.example.RCCC03.auth.model.LoginRequest;
 import com.example.RCCC03.auth.model.RegisterRequest;
 import com.example.RCCC03.auth.model.User;
-import com.example.RCCC03.customer.Customer;
-import com.example.RCCC03.customer.CustomerRepository;
+import com.example.RCCC03.customer.model.Customer;
+import com.example.RCCC03.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

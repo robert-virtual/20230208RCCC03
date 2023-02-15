@@ -1,4 +1,4 @@
-package com.example.RCCC03.auth;
+package com.example.RCCC03.auth.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

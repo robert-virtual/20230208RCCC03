@@ -1,6 +1,6 @@
 package com.example.RCCC03.config;
 
-import com.example.RCCC03.auth.JwtService;
+import com.example.RCCC03.auth.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
