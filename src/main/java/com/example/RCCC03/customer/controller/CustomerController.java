@@ -18,7 +18,6 @@ import java.util.Optional;
 @RequestMapping("/customer")
 public class CustomerController {
     private final CustomerRepository customerRepo ;
-    private final AccountRepository accountRepo ;
 
     @GetMapping("/all")
     public CustomersResponse getAll(){
