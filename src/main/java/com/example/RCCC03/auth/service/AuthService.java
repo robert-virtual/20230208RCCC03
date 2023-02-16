@@ -5,8 +5,6 @@ import com.example.RCCC03.auth.model.AuthResponse;
 import com.example.RCCC03.auth.model.LoginRequest;
 import com.example.RCCC03.auth.model.RegisterRequest;
 import com.example.RCCC03.auth.model.User;
-import com.example.RCCC03.customer.model.Customer;
-import com.example.RCCC03.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +22,10 @@ public class AuthService {
    private final PasswordEncoder passwordEncoder;
 
    private final UserRepository userRepository;
-   private final CustomerRepository customerRepository;
 
+   public Optional<User> info(String email){
+       return userRepository.findByEmail(email);
+   }
    public AuthResponse login(LoginRequest loginRequest){
        authenticationManager.authenticate(
                new UsernamePasswordAuthenticationToken(

@@ -17,7 +17,7 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     private static final String ACCESS_TOKEN_SECRET = "25432A462D4A614E645267556B58703273357638792F423F4428472B4B625065";
-    private static final int ACCESS_TOKEN_EXPIRATION_MILLISECONDS = 1000*60*5;//5 minutes
+    private static final int ACCESS_TOKEN_EXPIRATION_MILLISECONDS = 1000*60*10;// 10 minutes
 
     public Date extractExpiration(String jwt){
         return extractClaim(jwt,Claims::getExpiration);
@@ -27,8 +27,6 @@ public class JwtService {
     }
     public boolean isTokenValid(String jwt,UserDetails userDetails){
         String email = extractEmail(jwt);
-        System.out.println(email+" " + userDetails.getUsername());
-        System.out.println("!isTokenExpired(jwt): "+!isTokenExpired(jwt));
         return email.equals(userDetails.getUsername()) && !isTokenExpired(jwt);
     }
 
