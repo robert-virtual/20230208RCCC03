@@ -33,7 +33,12 @@ public class AuthService {
                        loginRequest.getPassword()
                )
        );
-       var user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow();
+       var user = userRepository.findByEmail(loginRequest.getEmail())
+               .map(user1 -> {
+                  user1.setLast_login(LocalDateTime.now());
+                  return user1;
+               })
+               .orElseThrow();
        var jwt = jwtService.generateToken(user);
        return AuthResponse.builder()
                .token(jwt)
