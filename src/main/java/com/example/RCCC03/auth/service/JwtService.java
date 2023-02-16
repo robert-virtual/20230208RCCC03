@@ -12,12 +12,11 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 @Service
 public class JwtService {
-    private static final String ACCESS_TOKEN_SECRET = "472B4B6150645367566B5970337336763979244226452948404D635165546857";
+    private static final String ACCESS_TOKEN_SECRET = "25432A462D4A614E645267556B58703273357638792F423F4428472B4B625065";
     private static final int ACCESS_TOKEN_EXPIRATION_MILLISECONDS = 1000*60;
 
     public Date extractExpiration(String jwt){
@@ -28,6 +27,8 @@ public class JwtService {
     }
     public boolean isTokenValid(String jwt,UserDetails userDetails){
         String email = extractEmail(jwt);
+        System.out.println(email+" " + userDetails.getUsername());
+        System.out.println("!isTokenExpired(jwt): "+!isTokenExpired(jwt));
         return email.equals(userDetails.getUsername()) && !isTokenExpired(jwt);
     }
 
@@ -62,7 +63,7 @@ public class JwtService {
                 .parserBuilder()
                 .setSigningKey(getSigninKey())
                 .build()
-                .parseClaimsJwt(jwt).getBody();
+                .parseClaimsJws(jwt).getBody();
     }
 
     private Key getSigninKey() {

@@ -74,7 +74,7 @@ CREATE TABLE [payroll_customer] (
 
 
 CREATE TABLE [account] (
-    [id] bigint PRIMARY KEY IDENTITY(1, 1),
+    [id] bigint PRIMARY KEY IDENTITY(1000000000000000, 1),
     [account_type] int,
     [company] bit DEFAULT (0),
     [available_balance] nvarchar DEFAULT (0),
@@ -85,7 +85,7 @@ CREATE TABLE [account] (
 
 
 CREATE TABLE [provider] (
-    [id] bigint PRIMARY KEY IDENTITY(1, 1),
+    [id] bigint PRIMARY KEY IDENTITY(10000000, 1),
     [name] nvarchar(50),
     [customer_id] bigint
     )
