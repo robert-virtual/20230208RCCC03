@@ -17,7 +17,7 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     private static final String ACCESS_TOKEN_SECRET = "25432A462D4A614E645267556B58703273357638792F423F4428472B4B625065";
-    private static final int ACCESS_TOKEN_EXPIRATION_MILLISECONDS = 1000*60;
+    private static final int ACCESS_TOKEN_EXPIRATION_MILLISECONDS = 1000*60*5;//5 minutes
 
     public Date extractExpiration(String jwt){
         return extractClaim(jwt,Claims::getExpiration);

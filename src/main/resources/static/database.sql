@@ -10,12 +10,6 @@ CREATE TABLE [role] (
 
 
 
-
-
-
-
-
-
 CREATE TABLE [users] (
     [id] bigint PRIMARY KEY IDENTITY(1, 1),
     [role] int,
@@ -73,6 +67,11 @@ CREATE TABLE [payroll_customer] (
 )
 
 
+create table [account_status](
+                                 id int primary key identity,
+                                 status nvarchar(50)
+    )
+
 CREATE TABLE [account] (
     [id] bigint PRIMARY KEY IDENTITY(1000000000000000, 1),
     [account_type] int,
@@ -81,6 +80,7 @@ CREATE TABLE [account] (
     [held_balance] nvarchar DEFAULT (0),
     [customer_id] bigint,
     [created_at] datetime DEFAULT (getdate())
+    [status] int not null default(1)
     )
 
 
@@ -123,7 +123,7 @@ CREATE TABLE [transaction_status] (
     )
 
 
-    5
+
 
 
 
@@ -131,7 +131,7 @@ CREATE TABLE [transaction] (
     [id] bigint PRIMARY KEY IDENTITY(1, 1),
     [user_id] bigint,
     [source_account] bigint,
-    [transacction_type] int,
+    [transaction_type] int,
     [currency] nvarchar(5),
     [date] datetime DEFAULT (getdate()),
     [status] int
@@ -139,7 +139,7 @@ CREATE TABLE [transaction] (
 
 
 CREATE TABLE [transaction_target_account] (
-    [transacction_id] bigint,
+    [transaction_id] bigint,
     [target_account] bigint,
 [amount] nvarchar
 )
@@ -174,6 +174,8 @@ ALTER TABLE [account] ADD FOREIGN KEY ([account_type]) REFERENCES [account_type]
 
 ALTER TABLE [account] ADD FOREIGN KEY ([customer_id]) REFERENCES [customer] ([id])
 
+ALTER TABLE [account] ADD FOREIGN KEY ([status]) REFERENCES [account_status] ([id])
+
 
 ALTER TABLE [provider] ADD FOREIGN KEY ([customer_id]) REFERENCES [customer] ([id])
 
@@ -190,13 +192,13 @@ ALTER TABLE [transaction] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([id])
 ALTER TABLE [transaction] ADD FOREIGN KEY ([source_account]) REFERENCES [account] ([id])
 
 
-ALTER TABLE [transaction] ADD FOREIGN KEY ([transacction_type]) REFERENCES [transacction_type] ([id])
+ALTER TABLE [transaction] ADD FOREIGN KEY ([transaction_type]) REFERENCES [transaction_type] ([id])
 
 
 ALTER TABLE [transaction] ADD FOREIGN KEY ([status]) REFERENCES [transaction_status] ([id])
 
 
-ALTER TABLE [transaction_target_account] ADD FOREIGN KEY ([transacction_id]) REFERENCES [transaction] ([id])
+ALTER TABLE [transaction_target_account] ADD FOREIGN KEY ([transaction_id]) REFERENCES [transaction] ([id])
 
 
 ALTER TABLE [transaction_target_account] ADD FOREIGN KEY ([target_account]) REFERENCES [account] ([id])
@@ -253,7 +255,18 @@ ALTER TABLE [audit_log] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([id])
     ('PPR','Pago de proveedores')
 
 
+    insert into account_status(status) values('active'),('inactive')
+
+select * from account_type
+
 
 
 
     insert into transaction_status values('pending'),('authorized')
+
+
+
+
+
+
+
