@@ -1,9 +1,9 @@
 package com.example.RCCC03.provider;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/provider")
@@ -15,4 +15,16 @@ public class ProviderController {
     public Iterable<Provider> all(){
         return providerRepo.findAll();
     }
+    @PostMapping ("/create")
+    public Provider create(@RequestBody Provider body){
+        return providerRepo.save(body);
+    }
+    @PutMapping ("/update/{id}")
+    public Optional<Provider> create(@RequestBody Provider body, @PathVariable long id){
+        return providerRepo.findById(id).map(provider ->{
+            provider.setName(body.getName());
+            return provider;
+        });
+    }
+
 }
