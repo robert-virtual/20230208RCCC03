@@ -23,10 +23,10 @@ public class Customer {
     private long id;
     private String name;
     private String lastname;
-    /*@OneToMany
+    @OneToMany
     @JoinColumn(name = "customer_id",referencedColumnName = "id")
     private List<Account> accounts;
-     */
+
     private Date birthdate;
     private String email;
     private String phone;

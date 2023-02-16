@@ -16,6 +16,7 @@ public class Account {
         this.available_balance = "0";
         this.held_balance = "0";
         this.company = false;
+        this.status =1;
         this.created_at = LocalDateTime.now();
     }
     @Id
@@ -30,5 +31,6 @@ public class Account {
 
     private long customer_id;
     private LocalDateTime created_at;
+    private int status;
 
 }
