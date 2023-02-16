@@ -40,19 +40,8 @@ public class AuthService {
 
    }
     public AuthResponse register(RegisterRequest registerRequest){
-       var customer = Customer.builder()
-               .name(registerRequest.getName())
-               .birthdate(registerRequest.getBirthdate())
-               .phone(registerRequest.getPhone())
-               .email(registerRequest.getEmail())
-               .created_at(LocalDateTime.now())
-               .lastname(registerRequest.getLastname())
-               .build();
-        long customer_id = customerRepository.save(customer).getId();
-        //Customer db_customer = customerRepository.findById(customer_id).orElseThrow();
-        System.out.println("customer id: "+customer_id);
         var user = User.builder()
-                .customer_id(customer_id)
+                .customer_id(registerRequest.getCustomer_id())
                 .email(registerRequest.getEmail())
                 .role(registerRequest.getRole())
                 .created_at(LocalDateTime.now())
