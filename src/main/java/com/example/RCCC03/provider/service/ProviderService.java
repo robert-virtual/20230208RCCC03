@@ -1,27 +1,28 @@
 package com.example.RCCC03.provider.service;
 
 
-import com.example.RCCC03.provider.model.AllProvidersResponse;
+import com.example.RCCC03.account.controller.DataCountResponse;
 import com.example.RCCC03.provider.model.Provider;
 import com.example.RCCC03.provider.ProviderRepository;
+import com.example.RCCC03.provider.model.Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Service
+@org.springframework.stereotype.Service
 @RequiredArgsConstructor
 public class ProviderService {
     private final ProviderRepository providerRepo;
 
-    public AllProvidersResponse getAll(){
+    public DataCountResponse<Service> getAllServices(long id){
+        Provider provider = providerRepo.findById(id).orElseThrow();
+        var services = provider.getServices();
+        return new DataCountResponse<>(services.size(),services);
+    }
+    public DataCountResponse<Provider> getAll(){
         var providers = providerRepo.findAll();
-       return AllProvidersResponse
-               .builder()
-               .providers(providers)
-               .count(providers.size())
-               .build();
+       return new DataCountResponse<>(providers.size(),providers);
     }
 
     public Optional<Provider> update(Provider body, long id){

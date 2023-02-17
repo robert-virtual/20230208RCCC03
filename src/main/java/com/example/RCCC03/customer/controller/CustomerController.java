@@ -1,13 +1,14 @@
 package com.example.RCCC03.customer.controller;
 
+import com.example.RCCC03.account.controller.DataCountResponse;
 import com.example.RCCC03.account.model.Account;
-import com.example.RCCC03.account.model.CustomersResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -17,10 +18,9 @@ public class CustomerController {
     private final CustomerRepository customerRepo ;
 
     @GetMapping("/all")
-    public CustomersResponse getAll(){
-        return CustomersResponse.builder()
-                .customers(customerRepo.findAll())
-                .build();
+    public DataCountResponse<Customer> getAll(){
+        List<Customer> customers = customerRepo.findAll();
+        return new DataCountResponse<>(customers.size(),customers);
     }
     @GetMapping("/{id}")
     public ResponseEntity<Customer>  getOne(
@@ -29,11 +29,12 @@ public class CustomerController {
         return ResponseEntity.ok(customerRepo.findById(id).orElseThrow());
     }
     @GetMapping("/{customer_id}/accounts")
-    public Iterable<Account> getAccounts(
+    public ResponseEntity<DataCountResponse<Account>> getAccounts(
             @PathVariable long customer_id
     ){
-        var customer = customerRepo.findById(customer_id).orElseThrow();
-        return customer.getAccounts();
+        Customer customer = customerRepo.findById(customer_id).orElseThrow();
+        List<Account> accounts = customer.getAccounts();
+        return ResponseEntity.ok(new DataCountResponse<>(accounts.size(),accounts));
     }
 
     @PostMapping("/create") ResponseEntity<Customer> create(@RequestBody Customer body){
