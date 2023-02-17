@@ -23,7 +23,7 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-   private int account_type;
+    private int account_type;
     private boolean company;
     private String available_balance;
     private String held_balance;

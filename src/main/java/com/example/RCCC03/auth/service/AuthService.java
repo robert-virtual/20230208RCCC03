@@ -1,13 +1,12 @@
 package com.example.RCCC03.auth.service;
 
+import com.example.RCCC03.auth.model.*;
+import com.example.RCCC03.auth.repository.RoleRepository;
 import com.example.RCCC03.auth.repository.UserRepository;
-import com.example.RCCC03.auth.model.AuthResponse;
-import com.example.RCCC03.auth.model.LoginRequest;
-import com.example.RCCC03.auth.model.RegisterRequest;
-import com.example.RCCC03.auth.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +21,7 @@ public class AuthService {
    private final PasswordEncoder passwordEncoder;
 
    private final UserRepository userRepository;
+    private final RoleRepository roleRepo;
 
    public Optional<User> info(String email){
        return userRepository.findByEmail(email);
@@ -48,6 +48,9 @@ public class AuthService {
 
    }
     public AuthResponse register(RegisterRequest registerRequest){
+       // verify that the user has permission to create accounts
+        var authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+        System.out.println();
         var user = User.builder()
                 .customer_id(registerRequest.getCustomer_id())
                 .email(registerRequest.getEmail())
@@ -64,6 +67,8 @@ public class AuthService {
                 .build();
 
     }
-
+    public Role getRole(int id){
+       return roleRepo.findById(id).orElseThrow();
+    }
 
 }
