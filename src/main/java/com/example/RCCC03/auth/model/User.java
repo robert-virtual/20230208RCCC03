@@ -1,6 +1,5 @@
 package com.example.RCCC03.auth.model;
 
-import com.example.RCCC03.customer.model.Customer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +20,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class User implements UserDetails {
+
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -31,11 +33,6 @@ public class User implements UserDetails {
     private String email;
     private int failed_logins;
 
-/*
-    @ManyToOne
-    @JoinColumn(name="id")
-    private Customer customer;
-* */
     private long customer_id;
 
     private boolean status;
@@ -45,9 +42,13 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+
         List<String> roles = new ArrayList<>();
-        roles.add("operator");
-        roles.add("authorizer");
+        switch (role) {
+            case 1 -> roles.add("operator");
+            case 2 -> roles.add("authorizer");
+            case 3 -> roles.add("accounts_creator");
+        }
         return roles.stream().map(SimpleGrantedAuthority::new).toList();
     }
 

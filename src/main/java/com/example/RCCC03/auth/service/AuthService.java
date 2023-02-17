@@ -6,6 +6,7 @@ import com.example.RCCC03.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -47,10 +48,13 @@ public class AuthService {
                .build();
 
    }
-    public AuthResponse register(RegisterRequest registerRequest){
+    public AuthResponse register(RegisterRequest registerRequest) throws Exception {
        // verify that the user has permission to create accounts
         var authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
-        System.out.println();
+        if (authorities.stream().noneMatch(authrity->authrity.getAuthority().matches("accounts_creator"))){
+            System.out.println("User does not have permission to create users");
+            throw new Exception("User does not have permission to create users");
+        }
         var user = User.builder()
                 .customer_id(registerRequest.getCustomer_id())
                 .email(registerRequest.getEmail())
@@ -64,6 +68,7 @@ public class AuthService {
         var jwt = jwtService.generateToken(user);
         return AuthResponse.builder()
                 .token(jwt)
+                .user(user)
                 .build();
 
     }
