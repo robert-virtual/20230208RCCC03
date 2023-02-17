@@ -1,16 +1,13 @@
 package com.example.RCCC03.provider.service;
 
 
-import com.example.RCCC03.auth.model.AuthResponse;
-import com.example.RCCC03.auth.model.RegisterRequest;
-import com.example.RCCC03.auth.model.User;
-import com.example.RCCC03.provider.Provider;
+import com.example.RCCC03.provider.model.AllProvidersResponse;
+import com.example.RCCC03.provider.model.Provider;
 import com.example.RCCC03.provider.ProviderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -18,8 +15,13 @@ import java.util.Optional;
 public class ProviderService {
     private final ProviderRepository providerRepo;
 
-    public Iterable<Provider> getAll(){
-       return providerRepo.findAll();
+    public AllProvidersResponse getAll(){
+        var providers = providerRepo.findAll();
+       return AllProvidersResponse
+               .builder()
+               .providers(providers)
+               .count(providers.size())
+               .build();
     }
 
     public Optional<Provider> update(Provider body, long id){

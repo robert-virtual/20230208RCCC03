@@ -1,4 +1,4 @@
-package com.example.RCCC03.provider;
+package com.example.RCCC03.provider.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

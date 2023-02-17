@@ -1,5 +1,7 @@
 package com.example.RCCC03.provider;
 
+import com.example.RCCC03.provider.model.AllProvidersResponse;
+import com.example.RCCC03.provider.model.Provider;
 import com.example.RCCC03.provider.service.ProviderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +16,7 @@ public class ProviderController {
 
     private final ProviderService providerService;
     @GetMapping("/all")
-    public ResponseEntity<Iterable<Provider>> all(){
+    public ResponseEntity<AllProvidersResponse> all(){
         return ResponseEntity.ok(providerService.getAll());
     }
     @PostMapping ("/create")
