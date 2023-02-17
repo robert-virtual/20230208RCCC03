@@ -1,6 +1,6 @@
 package com.example.RCCC03.customer.model;
 
-import com.example.RCCC03.account.Account;
+import com.example.RCCC03.account.model.Account;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package com.example.RCCC03.account;
+package com.example.RCCC03.account.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,7 +21,7 @@ public class Account {
     }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private long account_number;
 
     private int account_type;
     private boolean company;

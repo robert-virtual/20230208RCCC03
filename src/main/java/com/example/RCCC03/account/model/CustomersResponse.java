@@ -1,4 +1,4 @@
-package com.example.RCCC03.account;
+package com.example.RCCC03.account.model;
 
 import com.example.RCCC03.customer.model.Customer;
 import lombok.Builder;

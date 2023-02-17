@@ -1,16 +1,13 @@
 package com.example.RCCC03.customer.controller;
 
-import com.example.RCCC03.account.Account;
-import com.example.RCCC03.account.AccountRepository;
-import com.example.RCCC03.account.CustomersResponse;
+import com.example.RCCC03.account.model.Account;
+import com.example.RCCC03.account.model.CustomersResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
