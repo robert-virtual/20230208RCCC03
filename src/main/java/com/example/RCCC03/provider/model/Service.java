@@ -21,7 +21,6 @@ public class Service {
     private long id;
 
     private String service;
-    private Double price;
     private boolean status;
 
 }

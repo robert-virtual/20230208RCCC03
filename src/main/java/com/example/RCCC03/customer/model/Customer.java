@@ -1,6 +1,8 @@
 package com.example.RCCC03.customer.model;
 
 import com.example.RCCC03.account.model.Account;
+import com.example.RCCC03.auth.model.User;
+import com.example.RCCC03.provider.model.Provider;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,9 +34,12 @@ public class Customer {
     private String phone;
     private LocalDateTime created_at;
 
-    /*
     @OneToMany
+    @JoinColumn(name = "customer_id",referencedColumnName = "id")
+    private List<Provider> providers;
+
+    @OneToMany
+    @JoinColumn(name = "customer_id",referencedColumnName = "id")
     private List<User> users;
-    */
 
 }

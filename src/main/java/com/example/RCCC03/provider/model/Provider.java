@@ -1,5 +1,6 @@
 package com.example.RCCC03.provider.model;
 
+import com.example.RCCC03.customer.model.Customer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +20,9 @@ public class Provider {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String name;
+
     private long customer_id;
+
 
     @ManyToMany
     @JoinTable(
