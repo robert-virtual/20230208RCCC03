@@ -16,10 +16,12 @@ import java.util.List;
 @Entity
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class Customer {
 
+    public Customer(){
+       company = false;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -31,6 +33,7 @@ public class Customer {
 
     private Date birthdate;
     private String email;
+    private boolean company;
     private String phone;
     private LocalDateTime created_at;
 

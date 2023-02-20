@@ -15,7 +15,6 @@ public class Account {
     public Account(){
         this.available_balance = "0";
         this.held_balance = "0";
-        this.company = false;
         this.status =1;
         this.created_at = LocalDateTime.now();
     }
@@ -24,7 +23,6 @@ public class Account {
     private long account_number;
 
     private int account_type;
-    private boolean company;
     private String available_balance;
     private String held_balance;
 
