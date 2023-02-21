@@ -1,15 +1,13 @@
 package com.example.RCCC03.payroll.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -24,5 +22,8 @@ public class Payroll {
     private String note;
     private LocalDateTime date;
 
+    @OneToMany
+    @JoinColumn(name = "payroll_id",referencedColumnName = "id")
+    private List<PayrollDetail> details;
 
 }

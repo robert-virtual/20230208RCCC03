@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -33,7 +33,9 @@ public class Customer {
 
     private Date birthdate;
     private String email;
-    private boolean company;
+
+    @Column(nullable = true)
+    private boolean company = false;
     private String phone;
     private LocalDateTime created_at;
 
@@ -44,5 +46,20 @@ public class Customer {
     @OneToMany
     @JoinColumn(name = "customer_id",referencedColumnName = "id")
     private List<User> users;
+
+    @ManyToMany
+    @JoinTable(
+            name = "company_employee",
+            joinColumns = @JoinColumn(name = "employee_id",referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "company_id",referencedColumnName = "id")
+    )
+    private List<Customer> employees;
+    @ManyToMany
+    @JoinTable(
+            name = "company_employee",
+            joinColumns = @JoinColumn(name = "company_id",referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "employee_id",referencedColumnName = "id")
+    )
+    private List<Customer> companies;
 
 }

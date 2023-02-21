@@ -2,6 +2,7 @@ package com.example.RCCC03.customer.controller;
 
 import com.example.RCCC03.account.controller.DataCountResponse;
 import com.example.RCCC03.account.model.Account;
+import com.example.RCCC03.customer.model.CompanyEmployee;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +59,12 @@ public class CustomerController {
             @PathVariable long id
     ){
         customerRepo.deleteById(id);
+        return ResponseEntity.ok(
+                "user deleted successfully"
+        );
+    }
+    @PostMapping("/employee") ResponseEntity<String> addEmployee(@RequestBody CompanyEmployee body){
+
         return ResponseEntity.ok(
                 "user deleted successfully"
         );
