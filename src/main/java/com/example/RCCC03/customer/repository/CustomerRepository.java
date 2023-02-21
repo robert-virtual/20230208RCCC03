@@ -10,4 +10,5 @@ import java.util.List;
 public interface CustomerRepository extends JpaRepository<Customer,Long> {
     @Query(value = "select * from provider where customer_id = ?1",nativeQuery = true)
     List<Provider> findProviders(long id);
+    List<Customer> findAllByCompany(boolean company);
 }

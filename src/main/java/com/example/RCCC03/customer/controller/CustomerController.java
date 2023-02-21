@@ -6,6 +6,7 @@ import com.example.RCCC03.customer.model.CompanyEmployee;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +17,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/customer")
 public class CustomerController {
-    private final CustomerRepository customerRepo ;
+    private final CustomerRepository customerRepo;
 
     @GetMapping("/all")
-    public DataCountResponse<Customer> getAll(){
-        List<Customer> customers = customerRepo.findAll();
+    public DataCountResponse<Customer> getAll(@RequestParam(name = "company",defaultValue = "false") boolean company ){
+        System.out.println(company);
+        List<Customer> customers = customerRepo.findAllByCompany(company);
         return new DataCountResponse<>(customers.size(),customers);
     }
     @GetMapping("/{id}")
