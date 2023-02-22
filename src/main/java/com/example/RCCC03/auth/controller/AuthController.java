@@ -5,6 +5,7 @@ import com.example.RCCC03.auth.model.LoginRequest;
 import com.example.RCCC03.auth.model.RegisterRequest;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.service.AuthService;
+import com.example.RCCC03.config.BasicResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,8 +24,8 @@ public class AuthController {
        return ResponseEntity.ok(authService.login(body));
     }
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest body) throws Exception {
-        return ResponseEntity.ok(authService.register(body));
+    public ResponseEntity<BasicResponse<AuthResponse>> register(@RequestBody RegisterRequest body) throws Exception {
+        return authService.register(body);
     }
     @GetMapping("/info")
     public ResponseEntity<Optional<User>> info() {

@@ -3,13 +3,17 @@ package com.example.RCCC03.auth.service;
 import com.example.RCCC03.auth.model.*;
 import com.example.RCCC03.auth.repository.RoleRepository;
 import com.example.RCCC03.auth.repository.UserRepository;
+import com.example.RCCC03.config.BasicResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.function.EntityResponse;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -48,12 +52,20 @@ public class AuthService {
                .build();
 
    }
-    public AuthResponse register(RegisterRequest registerRequest) throws Exception {
+    public ResponseEntity<BasicResponse<AuthResponse>> register(RegisterRequest registerRequest) throws Exception {
        // verify that the user has permission to create accounts
         var authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
         if (authorities.stream().noneMatch(authrity->authrity.getAuthority().matches("accounts_creator"))){
-            System.out.println("User does not have permission to create users");
-            throw new Exception("User does not have permission to create users");
+
+            return new ResponseEntity<>(
+                    new BasicResponse<>(
+                            null,
+                            0,
+                            null,
+                            "User does not have permission to create users"
+                    ),
+                    HttpStatus.UNAUTHORIZED
+            );
         }
         var user = User.builder()
                 .customer_id(registerRequest.getCustomer_id())
@@ -66,10 +78,13 @@ public class AuthService {
                 .build();
         userRepository.save(user);
         var jwt = jwtService.generateToken(user);
-        return AuthResponse.builder()
+        return new ResponseEntity<>(
+                new BasicResponse<>(AuthResponse.builder()
                 .token(jwt)
                 .user(user)
-                .build();
+                .build(),1,null,null),
+                HttpStatus.CREATED
+        );
 
     }
     public Role getRole(int id){
