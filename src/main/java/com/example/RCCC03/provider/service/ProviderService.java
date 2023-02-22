@@ -4,6 +4,7 @@ package com.example.RCCC03.provider.service;
 import com.example.RCCC03.account.controller.DataCountResponse;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
+import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.provider.model.Provider;
 import com.example.RCCC03.provider.model.ServiceProvider;
 import com.example.RCCC03.provider.repository.ProviderRepository;
@@ -39,12 +40,14 @@ public class ProviderService {
     }
 
     public Provider createProvider(Provider provider) throws Exception {
-        // verify that the user has permission to create accounts
+        // verify that the user has permission to create providers
         var authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
         if (authorities.stream().noneMatch(authority->authority.getAuthority().matches("accounts_creator"))){
-            System.out.println("User does not have permission to create users");
-            throw new Exception("User does not have permission to create users");
+            System.out.println("User does not have permission to create providers");
+            throw new Exception("User does not have permission to create providers");
         }
+        User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
+        provider.setCustomer_id(user.getCustomer_id());
         return providerRepo.save(provider);
 
     }
