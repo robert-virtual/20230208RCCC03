@@ -21,6 +21,7 @@ public class Customer {
 
     public Customer(){
        company = false;
+        status = "active";
     }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +43,8 @@ public class Customer {
     private String address_1;
     private String address_2;
     private LocalDateTime created_at;
+    @Column(nullable = true)
+    private String status;
 
     @OneToMany
     @JoinColumn(name = "customer_id",referencedColumnName = "id")

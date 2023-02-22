@@ -4,6 +4,7 @@ import com.example.RCCC03.account.controller.DataCountResponse;
 import com.example.RCCC03.account.model.Account;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
+import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
@@ -68,12 +69,30 @@ public class CustomerController {
                 }).orElseThrow()
         );
     }
-    @DeleteMapping ("/delete/{id}") ResponseEntity<String> delete(
-            @PathVariable long id
+    @DeleteMapping ("/disable") ResponseEntity<BasicResponse> disable(
     ){
-        customerRepo.deleteById(id);
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepo.findByEmail(userEmail).orElseThrow();
+        Customer customer = customerRepo.findById(user.getCustomer_id()).orElseThrow();
+        customer.setStatus("inactive");
+        customerRepo.save(customer);
         return ResponseEntity.ok(
-                "user deleted successfully"
+                BasicResponse
+                        .builder()
+                        .message("user disabled successfully")
+                        .build()
+        );
+    }
+    @DeleteMapping ("/delete") ResponseEntity<BasicResponse> delete(
+    ){
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepo.findByEmail(userEmail).orElseThrow();
+        customerRepo.deleteById(user.getCustomer_id());
+        return ResponseEntity.ok(
+               BasicResponse
+                       .builder()
+                       .message("user deleted successfully")
+                       .build()
         );
     }
     @GetMapping("/employee")
