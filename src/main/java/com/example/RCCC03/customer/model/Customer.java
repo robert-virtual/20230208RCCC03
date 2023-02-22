@@ -39,6 +39,8 @@ public class Customer {
     @Column(nullable = true)
     private boolean company = false;
     private String phone;
+    private String address_1;
+    private String address_2;
     private LocalDateTime created_at;
 
     @OneToMany

@@ -23,6 +23,11 @@ public class CustomerController {
     private final CustomerRepository customerRepo;
     private final UserRepository userRepo;
 
+    @GetMapping("/me")
+    public Customer me() {
+        User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
+        return customerRepo.findById(user.getCustomer_id()).orElseThrow();
+    }
     @GetMapping("/all")
     public DataCountResponse<Customer> getAll(@RequestParam(name = "company",defaultValue = "false") boolean company ){
         System.out.println(company);
@@ -47,18 +52,21 @@ public class CustomerController {
     @PostMapping("/create") ResponseEntity<Customer> create(@RequestBody Customer body){
         return ResponseEntity.ok(customerRepo.save(body));
     }
-    @PostMapping("/update/{id}") ResponseEntity<Optional<Customer>> update(
-            @RequestBody Customer body,
-            @PathVariable long id
+    @PutMapping("/update") ResponseEntity<Customer> update(
+            @RequestBody Customer body
     ){
+        User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
+        long customer_id = user.getCustomer_id();
         return ResponseEntity.ok(
-                customerRepo.findById(id).map(customer->{
-                    customer.setName(body.getName());
-                    customer.setEmail(body.getEmail());
-                    customer.setLastname(body.getLastname());
-                    customer.setPhone(body.getPhone());
+                customerRepo.findById(customer_id).map(customer->{
+                    if(body.getName() != null) customer.setName(body.getName());
+                    if(body.getEmail() != null) customer.setEmail(body.getEmail());
+                    if(body.getLastname() != null) customer.setLastname(body.getLastname());
+                    if(body.getPhone() != null) customer.setPhone(body.getPhone());
+                    if(body.getAddress_1() != null) customer.setAddress_1(body.getAddress_1());
+                    if(body.getAddress_2() != null) customer.setAddress_2(body.getAddress_2());
                     return customerRepo.save(customer);
-                })
+                }).orElseThrow()
         );
     }
     @DeleteMapping ("/delete/{id}") ResponseEntity<String> delete(
