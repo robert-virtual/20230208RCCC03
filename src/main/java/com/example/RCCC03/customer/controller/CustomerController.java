@@ -69,7 +69,7 @@ public class CustomerController {
                 }).orElseThrow()
         );
     }
-    @DeleteMapping ("/disable") ResponseEntity<BasicResponse> disable(
+    @DeleteMapping ("/disable") ResponseEntity<BasicResponse<Object>> disable(
     ){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepo.findByEmail(userEmail).orElseThrow();
@@ -83,7 +83,7 @@ public class CustomerController {
                         .build()
         );
     }
-    @DeleteMapping ("/delete") ResponseEntity<BasicResponse> delete(
+    @DeleteMapping ("/delete") ResponseEntity<BasicResponse<Object>> delete(
     ){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepo.findByEmail(userEmail).orElseThrow();
@@ -91,7 +91,7 @@ public class CustomerController {
         return ResponseEntity.ok(
                BasicResponse
                        .builder()
-                       .message("user deleted successfully")
+                       .message("customer deleted successfully")
                        .build()
         );
     }
