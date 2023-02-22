@@ -2,14 +2,18 @@ package com.example.RCCC03.customer.controller;
 
 import com.example.RCCC03.account.controller.DataCountResponse;
 import com.example.RCCC03.account.model.Account;
-import com.example.RCCC03.customer.model.CompanyEmployee;
+import com.example.RCCC03.auth.model.User;
+import com.example.RCCC03.auth.repository.UserRepository;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -17,6 +21,7 @@ import java.util.Optional;
 @RequestMapping("/customer")
 public class CustomerController {
     private final CustomerRepository customerRepo;
+    private final UserRepository userRepo;
 
     @GetMapping("/all")
     public DataCountResponse<Customer> getAll(@RequestParam(name = "company",defaultValue = "false") boolean company ){
@@ -64,10 +69,25 @@ public class CustomerController {
                 "user deleted successfully"
         );
     }
-    @PostMapping("/employee") ResponseEntity<String> addEmployee(@RequestBody CompanyEmployee body){
-
+    @GetMapping("/employee")
+    public Iterable<Customer> getEmployees(){
+        String userEmail  = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepo.findByEmail(userEmail).orElseThrow();
+        return customerRepo.findById(user.getCustomer_id()).orElseThrow().getEmployees();
+    }
+    @PostMapping("/employee") ResponseEntity<Map<String,Object>> addEmployee(@RequestBody Map<String,String> body){
+        String employee_dni = body.get("employee_dni");
+        String userEmail  = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepo.findByEmail(userEmail).orElseThrow();
+        Customer employee = customerRepo.findByDni(employee_dni);
+        customerRepo.findById(user.getCustomer_id()).map(company->{
+            company.addEmployee(employee);
+            return customerRepo.save(company);
+        });
+        Map<String,Object> res = new HashMap<>();
+        res.put("message",employee.getName() + " successfully added to the company");
         return ResponseEntity.ok(
-                "user deleted successfully"
+               res
         );
     }
 }

@@ -33,6 +33,8 @@ public class Customer {
 
     private Date birthdate;
     private String email;
+    @Column(unique = true,nullable = false)
+    private String dni;
 
     @Column(nullable = true)
     private boolean company = false;
@@ -55,7 +57,7 @@ public class Customer {
     )
     private List<Customer> employees = new ArrayList<>();
     public void addEmployee(Customer employee){
-       employee.addEmployee(employee);
+       employees.add(employee);
     }
 
 }
