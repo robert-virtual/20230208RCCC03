@@ -4,7 +4,6 @@ package com.example.RCCC03.provider.service;
 import com.example.RCCC03.account.controller.DataCountResponse;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
-import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.provider.model.Provider;
 import com.example.RCCC03.provider.model.ServiceProvider;
 import com.example.RCCC03.provider.repository.ProviderRepository;
@@ -13,6 +12,7 @@ import com.example.RCCC03.service.repository.ServiceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.List;
 import java.util.Optional;
 
 @org.springframework.stereotype.Service
@@ -47,7 +47,7 @@ public class ProviderService {
             throw new Exception("User does not have permission to create providers");
         }
         User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
-        provider.setCustomer_id(user.getCustomer_id());
+        provider.setCustomerId(user.getCustomer_id());
         return providerRepo.save(provider);
 
     }
@@ -71,7 +71,7 @@ public class ProviderService {
     public String addServiceToProvider(ServiceProvider serviceProvider) throws Exception {
         User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
         Provider provider = providerRepo.findById(serviceProvider.getProvider_id()).orElseThrow();
-        if (provider.getCustomer_id() != user.getCustomer_id()){
+        if (provider.getCustomerId() != user.getCustomer_id()){
             throw new Exception("the given provider id does not belong to the user");
         }
         Service service = serviceRepo.findById(serviceProvider.getService_id()).orElseThrow();
@@ -79,5 +79,14 @@ public class ProviderService {
         providerRepo.save(provider);
         return "Service added successfully";
 
+    }
+
+    public DataCountResponse<Provider> providersByUser() {
+        User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
+        List<Provider> providers = providerRepo.findAllByCustomerId(user.getCustomer_id());
+        return DataCountResponse.<Provider>builder()
+                .count(providers.size())
+                .data(providers)
+                .build();
     }
 }

@@ -22,7 +22,8 @@ public class Provider {
     private long id;
     private String name;
 
-    private long customer_id;
+    @Column(name = "customer_id")
+    private long customerId;
 
 
     @ManyToMany

@@ -17,18 +17,28 @@ import java.util.Optional;
 public class ProviderController {
 
     private final ProviderService providerService;
+    // returns services of a specific provider
     @GetMapping("/{id}/services")
     public ResponseEntity<DataCountResponse<Service>> services(@PathVariable long id){
         return ResponseEntity.ok(providerService.getAllServices(id));
+    }
+    // returns all providers
+    @GetMapping("/user")
+    public ResponseEntity<DataCountResponse<Provider>> providersByUser(){
+        return ResponseEntity.ok(providerService.providersByUser());
     }
     @GetMapping("/all")
     public ResponseEntity<DataCountResponse<Provider>> all(){
         return ResponseEntity.ok(providerService.getAll());
     }
+
+    // creates a provider
     @PostMapping ("/create")
     public ResponseEntity<Provider> create(@RequestBody Provider body) throws Exception {
         return ResponseEntity.ok(providerService.createProvider(body));
     }
+    // add a service to a provider
+    // it verifies that the provider belongs to the user requesting the action
     @PostMapping ("/add/service")
     public ResponseEntity<String> createService(@RequestBody ServiceProvider body) throws Exception {
         return ResponseEntity.ok(providerService.addServiceToProvider(body));
