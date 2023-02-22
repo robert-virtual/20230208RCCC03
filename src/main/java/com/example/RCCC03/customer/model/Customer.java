@@ -7,9 +7,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -53,13 +53,9 @@ public class Customer {
             joinColumns = @JoinColumn(name = "employee_id",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "company_id",referencedColumnName = "id")
     )
-    private List<Customer> employees;
-    @ManyToMany
-    @JoinTable(
-            name = "company_employee",
-            joinColumns = @JoinColumn(name = "company_id",referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "employee_id",referencedColumnName = "id")
-    )
-    private List<Customer> companies;
+    private List<Customer> employees = new ArrayList<>();
+    public void addEmployee(Customer employee){
+       employee.addEmployee(employee);
+    }
 
 }

@@ -1,9 +1,6 @@
-package com.example.RCCC03.provider.model;
+package com.example.RCCC03.service.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,5 +19,7 @@ public class Service {
 
     private String service;
     private boolean status;
+
+
 
 }

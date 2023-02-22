@@ -1,12 +1,13 @@
 package com.example.RCCC03.provider.model;
 
-import com.example.RCCC03.customer.model.Customer;
+import com.example.RCCC03.service.model.Service;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,5 +31,8 @@ public class Provider {
             joinColumns = @JoinColumn(name = "provider_id",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "service_id",referencedColumnName = "id")
     )
-    private List<Service> services;
+    private List<Service> services = new ArrayList<>();
+    public void addService(Service service){
+       services.add(service);
+    }
 }
