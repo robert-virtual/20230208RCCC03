@@ -15,7 +15,7 @@ public class Account {
     public Account(){
         this.available_balance = "0";
         this.held_balance = "0";
-        this.status =1;
+        this.status = true;
         this.created_at = LocalDateTime.now();
     }
     @Id
@@ -29,6 +29,6 @@ public class Account {
 
     private long customer_id;
     private LocalDateTime created_at;
-    private int status;
+    private boolean status;
 
 }
