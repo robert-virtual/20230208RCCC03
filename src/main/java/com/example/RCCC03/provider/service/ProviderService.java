@@ -4,6 +4,7 @@ package com.example.RCCC03.provider.service;
 import com.example.RCCC03.account.controller.DataCountResponse;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
+import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.provider.model.Provider;
 import com.example.RCCC03.provider.model.ServiceProvider;
 import com.example.RCCC03.provider.repository.ProviderRepository;
@@ -22,8 +23,8 @@ public class ProviderService {
     private final UserRepository userRepo;
     private final ServiceRepository serviceRepo;
 
-    public DataCountResponse<Service> getAllServices(long id){
-        Provider provider = providerRepo.findById(id).orElseThrow();
+    public DataCountResponse<Service> getAllServices(long provider_id){
+        Provider provider = providerRepo.findById(provider_id).orElseThrow();
         var services = provider.getServices();
         return new DataCountResponse<>(services.size(),services);
     }
@@ -32,11 +33,16 @@ public class ProviderService {
        return new DataCountResponse<>(providers.size(),providers);
     }
 
-    public Optional<Provider> update(Provider body, long id){
-        return providerRepo.findById(id).map(provider ->{
-            provider.setName(body.getName());
-            return provider;
-        });
+    public Provider update(Provider body, long provider_id) throws Exception {
+        // verify that the provider belongs to the user requesting the action
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepo.findByEmail(userEmail).orElseThrow();
+        Provider provider = providerRepo.findById(provider_id).orElseThrow();
+        if (provider.getCustomerId() != user.getCustomer_id()){
+            throw  new Exception("the provider does not belong to the user requesting the action");
+        }
+        provider.setName(body.getName());
+        return providerRepo.save(provider);
     }
 
     public Provider createProvider(Provider provider) throws Exception {
@@ -68,7 +74,7 @@ public class ProviderService {
     }
      */
 
-    public String addServiceToProvider(ServiceProvider serviceProvider) throws Exception {
+    public BasicResponse addServiceToProvider(ServiceProvider serviceProvider) throws Exception {
         User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
         Provider provider = providerRepo.findById(serviceProvider.getProvider_id()).orElseThrow();
         if (provider.getCustomerId() != user.getCustomer_id()){
@@ -77,7 +83,10 @@ public class ProviderService {
         Service service = serviceRepo.findById(serviceProvider.getService_id()).orElseThrow();
         provider.addService(service);
         providerRepo.save(provider);
-        return "Service added successfully";
+        return BasicResponse
+                .builder()
+                .message("Service added successfully")
+                .build();
 
     }
 
