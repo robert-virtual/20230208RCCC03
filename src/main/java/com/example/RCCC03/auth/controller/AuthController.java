@@ -19,7 +19,7 @@ import java.util.Optional;
 public class AuthController {
     private final AuthService authService;
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest body) {
+    public ResponseEntity<BasicResponse<AuthResponse>> login(@RequestBody LoginRequest body) {
        return ResponseEntity.ok(authService.login(body));
     }
     @PostMapping("/register")

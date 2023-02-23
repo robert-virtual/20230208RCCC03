@@ -4,6 +4,8 @@ import com.example.RCCC03.auth.model.*;
 import com.example.RCCC03.auth.repository.RoleRepository;
 import com.example.RCCC03.auth.repository.UserRepository;
 import com.example.RCCC03.config.BasicResponse;
+import com.example.RCCC03.customer.model.Customer;
+import com.example.RCCC03.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -24,13 +29,14 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository;
+    private final CustomerRepository customerRepo;
     private final RoleRepository roleRepo;
 
     public Optional<User> info(String email) {
         return userRepository.findByEmail(email);
     }
 
-    public AuthResponse login(LoginRequest loginRequest) {
+    public BasicResponse<AuthResponse> login(LoginRequest loginRequest) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(),
@@ -43,13 +49,27 @@ public class AuthService {
                     return user1;
                 })
                 .orElseThrow();
+        // check whether the customer is active or not
+        Customer customer = customerRepo.findById(user.getCustomerId()).orElseThrow();
+        if(Objects.equals(customer.getStatus(), "inactive") || !user.isStatus()){
+            List<String> entities = new ArrayList<>();
+            if(Objects.equals(customer.getStatus(), "inactive")) entities.add("Customer");
+            if(!user.isStatus()) entities.add("User");
+           return BasicResponse.<AuthResponse>builder()
+                   .error(String.join(" and ",entities)+" disabled")
+                   .build();
+        }
         var jwt = jwtService.generateToken(user);
 
         // to avoid returning the user his encrypted password (security reasons)
         user.setPassword(null);
-        return AuthResponse.builder()
-                .token(jwt)
-                .user(user)
+        return BasicResponse.<AuthResponse>builder()
+                .data(
+                        AuthResponse.builder()
+                                .token(jwt)
+                                .user(user)
+                                .build()
+                )
                 .build();
 
     }
