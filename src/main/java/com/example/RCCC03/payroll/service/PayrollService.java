@@ -9,22 +9,20 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class PayrollService {
-   private final PayrollRepository payrollRepo;
-    public BasicResponse<Payroll> createPayrollWithDetails(Payroll payroll){
+    private final PayrollRepository payrollRepo;
+
+    public BasicResponse<Payroll> createPayrollWithDetails(Payroll payroll) {
         try {
-            return new BasicResponse<>(
-                    payrollRepo.save(payroll),
-                    1,
-                    null,
-                    null
-            );
-        }catch (Exception e){
-            return new BasicResponse<>(
-                    null,
-                    0,
-                    null,
-                   e.getMessage()
-            );
+            return BasicResponse.<Payroll>builder()
+                    .data_count(1)
+                    .data(payrollRepo.save(payroll))
+                    .build(
+
+                    );
+        } catch (Exception e) {
+            return BasicResponse.<Payroll>builder()
+                    .error(e.getMessage())
+                    .build();
         }
     }
 }

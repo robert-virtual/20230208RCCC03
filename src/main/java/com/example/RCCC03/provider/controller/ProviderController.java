@@ -1,6 +1,5 @@
 package com.example.RCCC03.provider.controller;
 
-import com.example.RCCC03.account.controller.DataCountResponse;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.provider.model.Provider;
 import com.example.RCCC03.service.model.Service;
@@ -9,6 +8,8 @@ import com.example.RCCC03.provider.service.ProviderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -19,7 +20,7 @@ public class ProviderController {
     private final ProviderService providerService;
     // returns services of a specific provider
     @GetMapping("/{provider_id}/services")
-    public ResponseEntity<DataCountResponse<Service>> services(
+    public ResponseEntity<BasicResponse<List<Service>>> services(
             @PathVariable long provider_id
     ){
         return ResponseEntity.ok(
@@ -28,13 +29,13 @@ public class ProviderController {
     }
     // returns all providers
     @GetMapping("/user")
-    public ResponseEntity<DataCountResponse<Provider>> providersByUser(){
+    public ResponseEntity<BasicResponse<List<Provider>>> providersByUser(){
         return ResponseEntity.ok(
                 providerService.providersByUser()
         );
     }
     @GetMapping("/all")
-    public ResponseEntity<DataCountResponse<Provider>> all(){
+    public ResponseEntity<BasicResponse<List<Provider>>> all(){
         return ResponseEntity.ok(
                 providerService.getAll()
         );

@@ -1,12 +1,10 @@
 package com.example.RCCC03.auth.model;
 
-import com.example.RCCC03.customer.model.Customer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.config.annotation.web.headers.HeadersSecurityMarker;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,7 +33,8 @@ public class User implements UserDetails {
     private String email;
     private int failed_logins;
 
-    private long customer_id;
+    @Column(name = "customer_id")
+    private long customerId;
 
     private boolean status;
     private LocalDateTime created_at;

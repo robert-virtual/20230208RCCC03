@@ -19,54 +19,53 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-   private final JwtService jwtService;
-   private final AuthenticationManager authenticationManager;
-   private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
 
-   private final UserRepository userRepository;
+    private final UserRepository userRepository;
     private final RoleRepository roleRepo;
 
-   public Optional<User> info(String email){
-       return userRepository.findByEmail(email);
-   }
-   public AuthResponse login(LoginRequest loginRequest){
-       authenticationManager.authenticate(
-               new UsernamePasswordAuthenticationToken(
-                       loginRequest.getEmail(),
-                       loginRequest.getPassword()
-               )
-       );
-       var user = userRepository.findByEmail(loginRequest.getEmail())
-               .map(user1 -> {
-                  user1.setLast_login(LocalDateTime.now());
-                  return user1;
-               })
-               .orElseThrow();
-       var jwt = jwtService.generateToken(user);
-       user.setPassword(null);
-       return AuthResponse.builder()
-               .token(jwt)
-               .user(user)
-               .build();
+    public Optional<User> info(String email) {
+        return userRepository.findByEmail(email);
+    }
 
-   }
+    public AuthResponse login(LoginRequest loginRequest) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getEmail(),
+                        loginRequest.getPassword()
+                )
+        );
+        var user = userRepository.findByEmail(loginRequest.getEmail())
+                .map(user1 -> {
+                    user1.setLast_login(LocalDateTime.now());
+                    return user1;
+                })
+                .orElseThrow();
+        var jwt = jwtService.generateToken(user);
+        user.setPassword(null);
+        return AuthResponse.builder()
+                .token(jwt)
+                .user(user)
+                .build();
+
+    }
+
     public ResponseEntity<BasicResponse<AuthResponse>> register(RegisterRequest registerRequest) throws Exception {
-       // verify that the user has permission to create accounts
+        // verify that the user has permission to create accounts
         var authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
-        if (authorities.stream().noneMatch(authrity->authrity.getAuthority().matches("accounts_creator"))){
+        if (authorities.stream().noneMatch(authority -> authority.getAuthority().matches("accounts_creator"))) {
 
             return new ResponseEntity<>(
-                    new BasicResponse<>(
-                            null,
-                            0,
-                            null,
-                            "User does not have permission to create users"
-                    ),
+                    BasicResponse.<AuthResponse>builder()
+                            .error("User does not have permission to create users")
+                            .build(),
                     HttpStatus.UNAUTHORIZED
             );
         }
         var user = User.builder()
-                .customer_id(registerRequest.getCustomer_id())
+                .customerId(registerRequest.getCustomer_id())
                 .email(registerRequest.getEmail())
                 .role(registerRequest.getRole())
                 .created_at(LocalDateTime.now())
@@ -77,16 +76,22 @@ public class AuthService {
         userRepository.save(user);
         var jwt = jwtService.generateToken(user);
         return new ResponseEntity<>(
-                new BasicResponse<>(AuthResponse.builder()
-                .token(jwt)
-                .user(user)
-                .build(),1,null,null),
+                BasicResponse.<AuthResponse>builder()
+                        .data_count(1)
+                        .data(
+                                AuthResponse.builder()
+                                        .token(jwt)
+                                        .user(user)
+                                        .build()
+                        )
+                        .build(),
                 HttpStatus.CREATED
         );
 
     }
-    public Role getRole(int id){
-       return roleRepo.findById(id).orElseThrow();
+
+    public Role getRole(int id) {
+        return roleRepo.findById(id).orElseThrow();
     }
 
 }
