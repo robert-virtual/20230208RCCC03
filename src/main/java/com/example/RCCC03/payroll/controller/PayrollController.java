@@ -1,5 +1,6 @@
 package com.example.RCCC03.payroll.controller;
 
+import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.payroll.model.Payroll;
 import com.example.RCCC03.payroll.service.PayrollService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +14,7 @@ public class PayrollController {
 
     private PayrollService payrollService;
     @PostMapping("/create")
-    private Payroll createPayroll(
+    private BasicResponse<Payroll> createPayroll(
             @RequestBody Payroll body
     ){
        return  payrollService.createPayrollWithDetails(body);

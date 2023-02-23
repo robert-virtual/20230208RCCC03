@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,6 +25,10 @@ public class Payroll {
 
     @OneToMany
     @JoinColumn(name = "payroll_id",referencedColumnName = "id")
-    private List<PayrollDetail> details;
+    private List<PayrollDetail> details = new ArrayList<>();
+
+    public void addDetail(PayrollDetail detail){
+      details.add(detail);
+    }
 
 }
