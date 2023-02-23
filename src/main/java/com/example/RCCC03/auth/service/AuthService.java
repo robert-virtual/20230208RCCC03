@@ -51,9 +51,10 @@ public class AuthService {
                 .orElseThrow();
         // check whether the customer is active or not
         Customer customer = customerRepo.findById(user.getCustomerId()).orElseThrow();
-        if(Objects.equals(customer.getStatus(), "inactive") || !user.isStatus()){
+        boolean inactive = Objects.equals(customer.getStatus(), "inactive");
+        if( inactive || !user.isStatus()){
             List<String> entities = new ArrayList<>();
-            if(Objects.equals(customer.getStatus(), "inactive")) entities.add("Customer");
+            if(inactive) entities.add("Customer");
             if(!user.isStatus()) entities.add("User");
            return BasicResponse.<AuthResponse>builder()
                    .error(String.join(" and ",entities)+" disabled")
