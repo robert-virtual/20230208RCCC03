@@ -36,6 +36,7 @@ public class User implements UserDetails {
     @Column(name = "customer_id")
     private long customerId;
 
+
     private boolean status;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;

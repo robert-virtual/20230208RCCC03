@@ -81,8 +81,7 @@ public class CustomerController {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepo.findByEmail(userEmail).orElseThrow();
         Customer customer = customerRepo.findById(user.getCustomerId()).orElseThrow();
-        List<User> users = userRepo.findAllByCustomerId(customer.getId());
-        users.forEach(x->{
+        customer.getUsers().forEach(x->{
             x.setStatus(false);
              userRepo.save(x);
         });
