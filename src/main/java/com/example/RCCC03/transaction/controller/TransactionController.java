@@ -1,6 +1,7 @@
 package com.example.RCCC03.transaction.controller;
 
 import com.example.RCCC03.config.BasicResponse;
+import com.example.RCCC03.transaction.dto.DebitEmployees;
 import com.example.RCCC03.transaction.model.Transaction;
 import com.example.RCCC03.transaction.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -17,5 +18,10 @@ public class TransactionController {
     @PostMapping("/create")
     public BasicResponse<Transaction> create(@RequestBody Transaction body){
         return transactionService.create(body);
+    }
+
+    @PostMapping("/debit/employees")
+    public BasicResponse<Transaction> debitEmployees(@RequestBody DebitEmployees body){
+        return transactionService.debitEmployees(body);
     }
 }
