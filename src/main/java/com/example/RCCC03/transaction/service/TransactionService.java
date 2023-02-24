@@ -89,6 +89,7 @@ public class TransactionService {
             return BasicResponse
                     .<Transaction>builder()
                     .data(transaction)
+                    .data_type("transaction")
                     .build();
 
         } catch (Exception e) {

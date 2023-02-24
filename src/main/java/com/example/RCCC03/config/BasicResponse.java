@@ -10,6 +10,7 @@ import lombok.Data;
 public class BasicResponse<T> {
     private T data;
     private int data_count;
+    private String data_type;
     private String message;
     private String error;
 
