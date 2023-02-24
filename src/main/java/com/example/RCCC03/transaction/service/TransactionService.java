@@ -62,7 +62,7 @@ public class TransactionService {
             transactionDetailsRepo.saveAll(details);
             //-----perform credit to target accounts--------
             details.forEach(detail -> {
-                accountRepo.findById(detail.getTarget_account()).map(source_account -> {
+                accountRepo.findById(detail.getTargetAccount()).map(source_account -> {
                     double debit = Double.parseDouble(
                             source_account.getAvailable_balance()
                     ) + Double.parseDouble(
@@ -170,7 +170,7 @@ public class TransactionService {
         //-----perform credit to target accounts--------
         Account source_account = accountRepo.findById(transaction.getAccount().getAccount_number()).orElseThrow();
         details.forEach(detail -> {
-            accountRepo.findById(detail.getTarget_account()).map(target_account -> {
+            accountRepo.findById(detail.getTargetAccount()).map(target_account -> {
                 double credit = Double.parseDouble(
                         detail.getAmount()
                 );
@@ -207,6 +207,22 @@ public class TransactionService {
                 .<Transaction>builder()
                 .data(transaction)
                 .data_type("transaction")
+                .build();
+    }
+
+    public BasicResponse<List<Transaction>> all(Account account) {
+        List<TransactionDetail> transactionDetails =  transactionDetailsRepo.findAllByTargetAccount(
+                Long.toString(account.getAccount_number())
+        );
+        List<Long> ids = transactionDetails.stream().mapToLong(TransactionDetail::getTransaction_id).boxed().toList();
+        List<Transaction> transactions  =  transactionRepo.findAllByAccount(account);
+        if (!ids.isEmpty()){
+            transactions.addAll(transactionRepo.findAllById(ids));
+        }
+        return BasicResponse.<List<Transaction>>builder()
+                .data(transactions)
+                .data_count(transactions.size())
+                .data_type("Transaction[]")
                 .build();
     }
 }

@@ -11,7 +11,8 @@ public class TransactionDetail {
     @Column(columnDefinition = "bigint primary key identity")
     private long id;
     private long transaction_id;
-    private long target_account;
+    @Column(name = "target_account")
+    private long targetAccount;
     private String amount;
 
 }
