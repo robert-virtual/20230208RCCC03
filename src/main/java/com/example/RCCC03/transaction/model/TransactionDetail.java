@@ -1,5 +1,6 @@
 package com.example.RCCC03.transaction.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,6 +13,7 @@ public class TransactionDetail {
     private long id;
     private long transaction_id;
     private String account_holder;
+    @JsonProperty("target_account")
     @Column(name = "target_account")
     private long targetAccount;
     private String amount;

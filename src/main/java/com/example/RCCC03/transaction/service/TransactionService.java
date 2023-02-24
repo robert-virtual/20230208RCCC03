@@ -5,6 +5,7 @@ import com.example.RCCC03.account.repository.AccountRepository;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
 import com.example.RCCC03.config.BasicResponse;
+import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
 import com.example.RCCC03.transaction.dto.DebitEmployees;
 import com.example.RCCC03.transaction.model.Transaction;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -131,12 +133,19 @@ public class TransactionService {
             );
             transaction.setDetails(new ArrayList<>());
             long transaction_id = transactionRepo.save(transaction).getId();
-            details = details.stream().map(detail -> {
+            details = details.stream().peek(detail -> {
+                Account target_account = accountRepo.findById(detail.getTargetAccount()).orElseThrow();
+
+                Customer target_customer = customerRepo.findById(
+                        target_account.getCustomerId()
+                ).orElseThrow();
+                detail.setAccount_holder(target_customer.getName());
                 detail.setTransaction_id(transaction_id);
-                return detail;
             }).toList();
 
             transactionDetailsRepo.saveAll(details);
+            // just to return the details in the json response
+            transaction.setDetails(details);
             return BasicResponse
                     .<Transaction>builder()
                     .data(transaction)
@@ -211,12 +220,12 @@ public class TransactionService {
     }
 
     public BasicResponse<List<Transaction>> all(Account account) {
-        List<TransactionDetail> transactionDetails =  transactionDetailsRepo.findAllByTargetAccount(
+        List<TransactionDetail> transactionDetails = transactionDetailsRepo.findAllByTargetAccount(
                 Long.toString(account.getAccount_number())
         );
         List<Long> ids = transactionDetails.stream().mapToLong(TransactionDetail::getTransaction_id).boxed().toList();
-        List<Transaction> transactions  =  transactionRepo.findAllByAccount(account);
-        if (!ids.isEmpty()){
+        List<Transaction> transactions = transactionRepo.findAllByAccount(account);
+        if (!ids.isEmpty()) {
             transactions.addAll(transactionRepo.findAllById(ids));
         }
         return BasicResponse.<List<Transaction>>builder()
