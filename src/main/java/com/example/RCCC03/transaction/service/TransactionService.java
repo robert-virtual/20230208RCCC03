@@ -5,7 +5,6 @@ import com.example.RCCC03.account.repository.AccountRepository;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
 import com.example.RCCC03.config.BasicResponse;
-import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
 import com.example.RCCC03.transaction.dto.DebitEmployees;
 import com.example.RCCC03.transaction.model.Transaction;
@@ -30,7 +29,7 @@ public class TransactionService {
     private final UserRepository userRepo;
     private final AccountRepository accountRepo;
 
-    public BasicResponse<Transaction> debitEmployees(DebitEmployees transaction){
+    public BasicResponse<Transaction> debitEmployees(DebitEmployees transaction) {
         try {
             String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userRepo.findByEmail(userEmail).orElseThrow();
@@ -42,7 +41,7 @@ public class TransactionService {
                     .error("the account does not belong to the user requesting the action")
                     .build();
 
-            transaction.setDate(LocalDateTime.now());
+            transaction.setOperated_at(LocalDateTime.now());
             transaction.setStatus(
                     TransactionStatus
                             .builder()
@@ -55,7 +54,7 @@ public class TransactionService {
             double total_credit = details.stream().mapToDouble(
                     detail -> Double.parseDouble(detail.getAmount())
             ).sum();
-            details = details.stream().map(detail->{
+            details = details.stream().map(detail -> {
                 detail.setTransaction_id(transaction_id);
                 return detail;
             }).toList();
@@ -99,6 +98,7 @@ public class TransactionService {
 
         }
     }
+
     public BasicResponse<Transaction> create(Transaction transaction) {
         try {
             String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -116,13 +116,13 @@ public class TransactionService {
             ).sum();
             // validate that the account has the required balance to perform the transaction
             if (
-                Double.parseDouble(source_account.getAvailable_balance()) < total_debit
+                    Double.parseDouble(source_account.getAvailable_balance()) < total_debit
             ) return BasicResponse
                     .<Transaction>builder()
                     .error("the account does not have the required balance to perform the transaction")
                     .build();
 
-            transaction.setDate(LocalDateTime.now());
+            transaction.setOperated_at(LocalDateTime.now());
             transaction.setStatus(
                     TransactionStatus
                             .builder()
@@ -131,38 +131,12 @@ public class TransactionService {
             );
             transaction.setDetails(new ArrayList<>());
             long transaction_id = transactionRepo.save(transaction).getId();
-            details = details.stream().map(detail->{
+            details = details.stream().map(detail -> {
                 detail.setTransaction_id(transaction_id);
                 return detail;
             }).toList();
 
             transactionDetailsRepo.saveAll(details);
-            //-----perform credit to target accounts--------
-            details.forEach(detail -> {
-                accountRepo.findById(detail.getTarget_account()).map(target_account -> {
-                    double credit =  Double.parseDouble(
-                            detail.getAmount()
-                    );
-                    double held_balance = Double.parseDouble(target_account.getHeld_balance()) + credit;
-                    target_account.setHeld_balance(
-                            Double.toString(held_balance)
-                    );
-                    return accountRepo.save(target_account);
-                });
-            });
-            // --------------------------------------------
-            // -------perform debit to source account-------
-            double held_balance = Double.parseDouble(source_account.getHeld_balance()) + total_debit;
-            double available_balance = Double.parseDouble(source_account.getAvailable_balance()) - total_debit;
-            source_account.setAvailable_balance(
-                  Double.toString(available_balance)
-            );
-            source_account.setHeld_balance(
-                    Double.toString(held_balance)
-            );
-            accountRepo.save(source_account);
-            // --------------------------------------------
-            transaction.setDetails(details);
             return BasicResponse
                     .<Transaction>builder()
                     .data(transaction)
@@ -176,5 +150,63 @@ public class TransactionService {
                     .build();
 
         }
+    }
+
+    public BasicResponse<Transaction> authorize(TransactionDetail body) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepo.findByEmail(userEmail).orElseThrow();
+        if (
+                user.getAuthorities().stream().noneMatch(
+                        authority -> authority.getAuthority() == "authorizer"
+                )
+        ) return BasicResponse.<Transaction>builder()
+                .error("the user does not have the required role to perform the action")
+                .build();
+        Transaction transaction = transactionRepo.findById(body.getTransaction_id()).orElseThrow();
+        List<TransactionDetail> details = transaction.getDetails();
+        double total_debit = details.stream().mapToDouble(
+                detail -> Double.parseDouble(detail.getAmount())
+        ).sum();
+        //-----perform credit to target accounts--------
+        Account source_account = accountRepo.findById(transaction.getAccount().getAccount_number()).orElseThrow();
+        details.forEach(detail -> {
+            accountRepo.findById(detail.getTarget_account()).map(target_account -> {
+                double credit = Double.parseDouble(
+                        detail.getAmount()
+                );
+                double held_balance = Double.parseDouble(target_account.getHeld_balance()) + credit;
+                target_account.setHeld_balance(
+                        Double.toString(held_balance)
+                );
+                return accountRepo.save(target_account);
+            });
+        });
+        // --------------------------------------------
+        // -------perform debit to source account-------
+        double held_balance = Double.parseDouble(source_account.getHeld_balance()) + total_debit;
+        double available_balance = Double.parseDouble(source_account.getAvailable_balance()) - total_debit;
+        source_account.setAvailable_balance(
+                Double.toString(available_balance)
+        );
+        source_account.setHeld_balance(
+                Double.toString(held_balance)
+        );
+        accountRepo.save(source_account);
+        // --------------------------------------------
+        transaction.setDetails(details);
+        // update transaction
+        transaction.setStatus(
+                TransactionStatus
+                        .builder()
+                        .id(2)
+                        .build()
+        );
+        transaction.setAuthorized_at(LocalDateTime.now());
+        transactionRepo.save(transaction);
+        return BasicResponse
+                .<Transaction>builder()
+                .data(transaction)
+                .data_type("transaction")
+                .build();
     }
 }

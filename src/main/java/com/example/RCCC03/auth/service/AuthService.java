@@ -28,40 +28,65 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
-    private final UserRepository userRepository;
+    private final UserRepository userRepo;
     private final CustomerRepository customerRepo;
     private final RoleRepository roleRepo;
 
     public Optional<User> info(String email) {
-        return userRepository.findByEmail(email);
+        return userRepo.findByEmail(email);
     }
 
     public BasicResponse<AuthResponse> login(LoginRequest loginRequest) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
-        );
-        User user = userRepository.findByEmail(loginRequest.getEmail())
-                .map(user1 -> {
-                    user1.setLast_login(LocalDateTime.now());
-                    return user1;
-                })
-                .orElseThrow();
+        User user;
+        try {
+            user = userRepo.findByEmail(loginRequest.getEmail())
+                    .orElseThrow();
+        } catch (Exception e) {
+            return BasicResponse
+                    .<AuthResponse>builder()
+                    .error("Bad credentials")
+                    .build();
+        }
+        if (user.getFailed_logins() >= 5 ){
+            user.setStatus(false);
+            userRepo.save(user);
+            return BasicResponse
+                    .<AuthResponse>builder()
+                    .error("User blocked after 5 failed logins attempts")
+                    .build();
+        }
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword()
+                    )
+            );
+
+        } catch (Exception e) {
+            user.setFailed_logins(user.getFailed_logins()+1);
+            userRepo.save(user);
+            return BasicResponse
+                    .<AuthResponse>builder()
+                    .error(e.getMessage())
+                    .build();
+        }
+
+
         // check whether the customer is active or not
         Customer customer = customerRepo.findById(user.getCustomerId()).orElseThrow();
         boolean inactive = Objects.equals(customer.getStatus(), "inactive");
-        if( inactive || !user.isStatus()){
+        if (inactive || !user.isStatus()) {
             List<String> entities = new ArrayList<>();
-            if(inactive) entities.add("Customer");
-            if(!user.isStatus()) entities.add("User");
-           return BasicResponse.<AuthResponse>builder()
-                   .error(String.join(" and ",entities)+" disabled")
-                   .build();
+            if (inactive) entities.add("Customer");
+            if (!user.isStatus()) entities.add("User");
+            return BasicResponse.<AuthResponse>builder()
+                    .error(String.join(" and ", entities) + " disabled")
+                    .build();
         }
         var jwt = jwtService.generateToken(user);
-
+        user.setLast_login(LocalDateTime.now());
+        userRepo.save(user);
         // to avoid returning the user his encrypted password (security reasons)
         user.setPassword(null);
         return BasicResponse.<AuthResponse>builder()
@@ -72,7 +97,6 @@ public class AuthService {
                                 .build()
                 )
                 .build();
-
     }
 
     public ResponseEntity<BasicResponse<AuthResponse>> register(RegisterRequest registerRequest) throws Exception {
@@ -96,7 +120,7 @@ public class AuthService {
                 .status(true)
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .build();
-        userRepository.save(user);
+        userRepo.save(user);
         var jwt = jwtService.generateToken(user);
         return new ResponseEntity<>(
                 BasicResponse.<AuthResponse>builder()

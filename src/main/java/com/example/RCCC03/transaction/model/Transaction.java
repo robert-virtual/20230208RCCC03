@@ -24,7 +24,8 @@ public class Transaction {
     private TransactionType transaction_type;
     // private int transaction_type;
     private String currency;
-    private LocalDateTime date;
+    private LocalDateTime operated_at;
+    private LocalDateTime authorized_at;
     @ManyToOne
     @JoinColumn(name = "status",referencedColumnName = "id")
     private TransactionStatus status;
