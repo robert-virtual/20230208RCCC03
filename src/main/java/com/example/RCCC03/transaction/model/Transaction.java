@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+@Entity(name = "transactions")
 @Data
 public class Transaction {
     @Id
@@ -21,7 +21,7 @@ public class Transaction {
     //private long source_account;
     @ManyToOne
     @JoinColumn(name = "transaction_type",referencedColumnName = "id")
-    private TransactionType transactionType;
+    private TransactionType transaction_type;
     // private int transaction_type;
     private String currency;
     private LocalDateTime date;

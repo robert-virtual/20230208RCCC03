@@ -28,16 +28,13 @@ public class TransactionService {
         try {
             String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userRepo.findByEmail(userEmail).orElseThrow();
-            Customer customer = customerRepo.findById(user.getCustomerId()).orElseThrow();
+            Account source_account = accountRepo.findById(transaction.getAccount().getAccount_number()).orElseThrow();
             if (
-                    customer.getAccounts().stream().anyMatch(
-                            account -> account.getAccount_number() == transaction.getAccount().getAccount_number()
-                    )
+                    source_account.getCustomerId() != user.getCustomerId()
             ) return BasicResponse
                     .<Transaction>builder()
                     .error("the account does not belong to the user requesting the action")
                     .build();
-            Account source_account = transaction.getAccount();
             double total_debit = transaction.getDetails().stream().mapToDouble(
                     detail -> {
                         accountRepo.findById(detail.getTarget_account()).map(target_account -> {
@@ -72,7 +69,7 @@ public class TransactionService {
                     .data(transactionRepo.save(transaction))
                     .build();
 
-        }catch (Exception e){
+        } catch (Exception e) {
             return BasicResponse
                     .<Transaction>builder()
                     .error(e.getMessage())
