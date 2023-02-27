@@ -27,7 +27,7 @@ public class AuthController {
         return authService.register(body);
     }
     @GetMapping("/info")
-    public ResponseEntity<Optional<User>> info() {
+    public ResponseEntity<User> info() {
         var name = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(authService.info(name));
     }

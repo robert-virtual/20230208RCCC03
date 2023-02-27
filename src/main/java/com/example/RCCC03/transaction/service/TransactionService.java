@@ -173,12 +173,20 @@ public class TransactionService {
                 .error("the user does not have the required role to perform the action")
                 .build();
         Transaction transaction = transactionRepo.findById(body.getTransaction_id()).orElseThrow();
+        if (transaction.getStatus().getId() == 2) return BasicResponse
+                .<Transaction>builder()
+                .error("Transaction already authorized")
+                .build();
+        Account source_account = accountRepo.findById(transaction.getAccount().getAccount_number()).orElseThrow();
+        if(source_account.getCustomerId() != user.getCustomerId()) return BasicResponse
+                .<Transaction>builder()
+                .error("This transaction does not belongs you")
+                .build();
+        //-----perform credit to target accounts--------
         List<TransactionDetail> details = transaction.getDetails();
         double total_debit = details.stream().mapToDouble(
                 detail -> Double.parseDouble(detail.getAmount())
         ).sum();
-        //-----perform credit to target accounts--------
-        Account source_account = accountRepo.findById(transaction.getAccount().getAccount_number()).orElseThrow();
         details.forEach(detail -> {
             accountRepo.findById(detail.getTargetAccount()).map(target_account -> {
                 double credit = Double.parseDouble(

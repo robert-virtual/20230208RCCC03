@@ -32,8 +32,10 @@ public class AuthService {
     private final CustomerRepository customerRepo;
     private final RoleRepository roleRepo;
 
-    public Optional<User> info(String email) {
-        return userRepo.findByEmail(email);
+    public User info(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow();
+       user.setPassword(null);
+        return user;
     }
 
     public BasicResponse<AuthResponse> login(LoginRequest loginRequest) {
