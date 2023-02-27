@@ -205,7 +205,10 @@ public class TransactionService {
 
 
         // -------perform debit to source account-------
-        double available_balance = Double.parseDouble(source_account.getAvailable_balance()) - total_debit;
+        double available_balance = Double.parseDouble(
+                source_account.getAvailable_balance()
+        ) - total_debit;
+        System.out.printf("total_debit: %s, available_balance: %s%n",total_debit,available_balance);
         source_account.setAvailable_balance(
                 Double.toString(available_balance)
         );
@@ -216,8 +219,11 @@ public class TransactionService {
                 double credit = Double.parseDouble(
                         detail.getAmount()
                 );
+                double target_available_balance = Double.parseDouble(
+                        target_account.getAvailable_balance()
+                ) + credit;
                 target_account.setAvailable_balance(
-                        Double.toString(credit)
+                        Double.toString(target_available_balance)
                 );
                 return accountRepo.save(target_account);
             });
