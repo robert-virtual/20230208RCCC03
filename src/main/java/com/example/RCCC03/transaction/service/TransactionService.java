@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -166,7 +167,7 @@ public class TransactionService {
         User user = userRepo.findByEmail(userEmail).orElseThrow();
         if (
                 user.getAuthorities().stream().noneMatch(
-                        authority -> authority.getAuthority() == "authorizer"
+                        authority -> Objects.equals(authority.getAuthority(), "authorizer")
                 )
         ) return BasicResponse.<Transaction>builder()
                 .error("the user does not have the required role to perform the action")
@@ -220,6 +221,13 @@ public class TransactionService {
     }
 
     public BasicResponse<List<Transaction>> all(Account account) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepo.findByEmail(userEmail).orElseThrow();
+        Account account_data = accountRepo.findById(account.getAccount_number()).orElseThrow();
+        if (account_data.getCustomerId() != user.getCustomerId()) return BasicResponse
+                .<List<Transaction>>builder()
+                .error("the account does not belong to the user requesting the information")
+                .build();
         List<TransactionDetail> transactionDetails = transactionDetailsRepo.findAllByTargetAccount(
                 Long.toString(account.getAccount_number())
         );
