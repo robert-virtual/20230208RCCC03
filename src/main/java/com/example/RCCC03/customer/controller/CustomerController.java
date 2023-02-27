@@ -145,10 +145,20 @@ public class CustomerController {
     }
 
     @GetMapping("/employee")
-    public Iterable<Customer> getEmployees() {
+    public BasicResponse<List<Customer>> getEmployees() {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepo.findByEmail(userEmail).orElseThrow();
-        return customerRepo.findById(user.getCustomerId()).orElseThrow().getEmployees();
+        List<Customer> employees = customerRepo.findById(
+                user.getCustomerId()
+        ).orElseThrow().getEmployees();
+        return BasicResponse
+                .<List<Customer>>builder()
+                .data_count(employees.size())
+                .data(
+                       employees
+                )
+                .data_type("Customer[]")
+                .build();
     }
 
     @PostMapping("/employee")
