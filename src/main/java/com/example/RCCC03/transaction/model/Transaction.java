@@ -41,4 +41,10 @@ public class Transaction {
     public void addDetail(TransactionDetail detail){
        details.add(detail);
     }
+
+
+
+    // not mapped properties
+    @Transient
+    private String amount;
 }

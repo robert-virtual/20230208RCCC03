@@ -12,6 +12,7 @@ import com.example.RCCC03.transaction.dto.DebitEmployees;
 import com.example.RCCC03.transaction.model.Transaction;
 import com.example.RCCC03.transaction.model.TransactionDetail;
 import com.example.RCCC03.transaction.model.TransactionStatus;
+import com.example.RCCC03.transaction.model.TransactionType;
 import com.example.RCCC03.transaction.repository.TransactionDetailRepository;
 import com.example.RCCC03.transaction.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
@@ -79,7 +80,12 @@ public class TransactionService {
                 return accountRepo.save(source_account);
             });
         });
-        Account target_account = accountRepo.findById(transaction.getAccount().getAccount_number()).orElseThrow();
+        System.out.println(transaction.getAccount().getAccount_number());
+        Account target_account = accountRepo.findById(
+                transaction
+                        .getAccount()
+                        .getAccount_number()
+        ).orElseThrow();
         // --------------------------------------------
         // -------perform debit to source account-------
         double available_balance = Double.parseDouble(
@@ -98,10 +104,11 @@ public class TransactionService {
                 .build();
     }
 
-    public BasicResponse<Transaction> debitEmployees(DebitEmployees transaction) {
+    public BasicResponse<Transaction> debitEmployees(Transaction transaction) {
         try {
             String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userRepo.findByEmail(userEmail).orElseThrow();
+            Customer company = customerRepo.findById(user.getCustomerId()).orElseThrow();
             Account target_account = accountRepo.findById(transaction.getAccount().getAccount_number()).orElseThrow();
             if (
                     target_account.getCustomerId() != user.getCustomerId()
@@ -118,18 +125,44 @@ public class TransactionService {
                             .id(1)
                             .build()
             );
-            List<TransactionDetail> details = transaction.getDetails();
+            List<TransactionDetail> details = new ArrayList<>();
+            List<Customer> employees = company.getEmployees();
             transaction.setDetails(new ArrayList<>());
+            transaction.setTransaction_type(
+                    TransactionType
+                            .builder()
+                            .id(1)
+                            .build()
+            );
             // save transaction
             long transaction_id = transactionRepo.save(transaction).getId();
-            details = details.stream().peek(
-                    detail -> {
-                        detail.setTransaction_id(transaction_id);
-                        if (
-                                transaction.isAll_employees()
-                        ) detail.setAmount(transaction.getAmount());
+            employees.forEach(
+                    employee -> {
+                        details.add(
+                                TransactionDetail
+                                        .builder()
+                                        .transaction_id(transaction_id)
+                                        .amount(transaction.getAmount())
+                                        .account_holder(employee.getName())
+                                        .targetAccount(
+                                                employee.getAccounts()
+                                                        .stream()
+                                                        .filter(
+                                                                account -> Double.parseDouble(
+                                                                        account.getAvailable_balance()
+                                                                ) >= Double.parseDouble(
+                                                                        transaction.getAmount()
+                                                                )
+                                                        )
+                                                        .findFirst()
+                                                        .orElseThrow()
+                                                        .getAccount_number()
+                                        )
+                                        .build()
+                        );
+
                     }
-            ).toList();
+            );
 
             transactionDetailsRepo.saveAll(details);
             transaction.setDetails(details);

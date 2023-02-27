@@ -1,5 +1,6 @@
 package com.example.RCCC03.account.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +29,7 @@ public class Account {
 
 
     @Column(name = "customer_id")
+    @JsonProperty("customer_id")
     private long customerId;
     private LocalDateTime created_at;
     private int status;

@@ -2,10 +2,13 @@ package com.example.RCCC03.transaction.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity(name = "transaction_detail")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TransactionDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
