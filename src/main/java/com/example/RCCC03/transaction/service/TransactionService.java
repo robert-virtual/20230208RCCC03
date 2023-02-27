@@ -119,7 +119,10 @@ public class TransactionService {
             ).sum();
             // validate that the account has the required balance to perform the transaction
             if (
-                    Double.parseDouble(source_account.getAvailable_balance()) < total_debit
+                    Double.parseDouble(
+                            source_account
+                                    .getAvailable_balance()
+                    ) < total_debit
             ) return BasicResponse
                     .<Transaction>builder()
                     .error("the account does not have the required balance to perform the transaction")
@@ -178,40 +181,48 @@ public class TransactionService {
                 .error("Transaction already authorized")
                 .build();
         Account source_account = accountRepo.findById(transaction.getAccount().getAccount_number()).orElseThrow();
-        if(source_account.getCustomerId() != user.getCustomerId()) return BasicResponse
+        if (source_account.getCustomerId() != user.getCustomerId()) return BasicResponse
                 .<Transaction>builder()
                 .error("This transaction does not belongs you")
                 .build();
+
         //-----perform credit to target accounts--------
         List<TransactionDetail> details = transaction.getDetails();
         double total_debit = details.stream().mapToDouble(
                 detail -> Double.parseDouble(detail.getAmount())
         ).sum();
+
+        // validate that the account has the required balance to perform the transaction
+        if (
+                Double.parseDouble(
+                        source_account
+                                .getAvailable_balance()
+                ) < total_debit
+        ) return BasicResponse
+                .<Transaction>builder()
+                .error("the account does not have the required balance to perform the transaction")
+                .build();
+
+
+        // -------perform debit to source account-------
+        double available_balance = Double.parseDouble(source_account.getAvailable_balance()) - total_debit;
+        source_account.setAvailable_balance(
+                Double.toString(available_balance)
+        );
+        accountRepo.save(source_account);
+        // --------------------------------------------
         details.forEach(detail -> {
             accountRepo.findById(detail.getTargetAccount()).map(target_account -> {
                 double credit = Double.parseDouble(
                         detail.getAmount()
                 );
-                double held_balance = Double.parseDouble(target_account.getHeld_balance()) + credit;
-                target_account.setHeld_balance(
-                        Double.toString(held_balance)
+                target_account.setAvailable_balance(
+                        Double.toString(credit)
                 );
                 return accountRepo.save(target_account);
             });
         });
         // --------------------------------------------
-        // -------perform debit to source account-------
-        double held_balance = Double.parseDouble(source_account.getHeld_balance()) + total_debit;
-        double available_balance = Double.parseDouble(source_account.getAvailable_balance()) - total_debit;
-        source_account.setAvailable_balance(
-                Double.toString(available_balance)
-        );
-        source_account.setHeld_balance(
-                Double.toString(held_balance)
-        );
-        accountRepo.save(source_account);
-        // --------------------------------------------
-        transaction.setDetails(details);
         // update transaction
         transaction.setStatus(
                 TransactionStatus
@@ -220,6 +231,7 @@ public class TransactionService {
                         .build()
         );
         transaction.setAuthorized_at(LocalDateTime.now());
+        transaction.setAuthorized_by(userEmail);
         transactionRepo.save(transaction);
         return BasicResponse
                 .<Transaction>builder()
