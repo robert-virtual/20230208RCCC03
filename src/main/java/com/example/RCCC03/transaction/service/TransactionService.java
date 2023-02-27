@@ -129,6 +129,7 @@ public class TransactionService {
                     .build();
 
             transaction.setOperated_at(LocalDateTime.now());
+            transaction.setOperated_by(userEmail);
             transaction.setStatus(
                     TransactionStatus
                             .builder()
@@ -191,7 +192,6 @@ public class TransactionService {
         double total_debit = details.stream().mapToDouble(
                 detail -> Double.parseDouble(detail.getAmount())
         ).sum();
-
         // validate that the account has the required balance to perform the transaction
         if (
                 Double.parseDouble(

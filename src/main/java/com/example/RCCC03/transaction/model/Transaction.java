@@ -32,6 +32,7 @@ public class Transaction {
     //private int status;
     private String notes;
     private String authorized_by;
+    private String operated_by;
 
     @OneToMany
     @JoinColumn(name = "transaction_id",referencedColumnName = "id")
