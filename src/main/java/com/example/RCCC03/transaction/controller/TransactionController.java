@@ -38,6 +38,12 @@ public class TransactionController {
         return transactionService.create(body);
     }
 
+    @PostMapping("/debit/employees/authorize")
+    public BasicResponse<Transaction> authorizeDebitToEmployees(
+            @RequestBody TransactionDetail body
+    ) {
+        return transactionService.authorizeDebitToEmployees(body);
+    }
     @PostMapping("/debit/employees")
     public BasicResponse<Transaction> debitEmployees(@RequestBody DebitEmployees body) {
         return transactionService.debitEmployees(body);
