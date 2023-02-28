@@ -6,6 +6,7 @@ import com.example.RCCC03.auth.repository.UserRepository;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,10 +47,10 @@ public class AuthService {
         return user;
     }
 
-    public String generateStrongPassword(){
+    public String generateStrongPassword() {
 
         char[] possibleCharacters = (
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&()-_=+[{]}\\|;:'\",<.>/?"
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%-_+\\|;:'\"./"
         ).toCharArray();
         return RandomStringUtils.random(
                 8,
@@ -60,6 +62,7 @@ public class AuthService {
                 new SecureRandom()
         );
     }
+
     public BasicResponse<AuthResponse> login(LoginRequest loginRequest) {
         User user;
         try {
@@ -162,29 +165,30 @@ public class AuthService {
                 )
                 .build();
         userRepo.save(user);
-        // remove encrypted password
-        user.setPassword(null);
-        // remove encrypted password
 
         // send email with user credentials
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("robertocastillodev@gmail.com");
-        message.setTo(registerRequest.getEmail());
-        message.setSubject("Tu usuario y contraseña para la banca en linea");
-        message.setText(String.format("Usuario: %s, Contraseña: %s",registerRequest.getEmail(),strongPassword));
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+        helper.setFrom("robertocastillodev@gmail.com");
+        helper.setTo(registerRequest.getEmail());
+        helper.setSubject("Tu usuario y contraseña para la banca en linea");
+        helper.setText(
+                String.format("""
+                        <img style="width:70vw;" src="https://ci3.googleusercontent.com/proxy/FlGICNOLfVc2LF1W0xlETyPvVi5jXJxo6auBUbmEnekCLJj4TpSkrUsXZSINgdqgY9uWWStSSrf-rTGQ_1jjebcpLWJneVBg3D6oyKuSzkif5s9u=s0-d-e1-ft#https://www.bancatlan.hn/img/Encabezado_PS05_AOL_716x462px-01.png" alt="banner banco atlantidad"/>
+                        <h1>Evaluacion tecnica Roberto Castillo</h1> 
+                        <p>FELICIDADES %s </p>
+                        <p>Ya tienes creado tu acceso creado de Banca en linea. Te damos la bienvenida  para que puedas realizar tus transacciones desde tu celular o computadora.</p>
+                        <p style="font-size:25px;">Usuario: %s <br/>Contraseña: <b>%s</b></p>
+                        <a href="http://localhost:3000">Ingresa a la banca en linea y configura tu nueva contraseña</a>
+                        """, registerRequest.getEmail(), registerRequest.getEmail(), strongPassword),
+                true
+        );
         javaMailSender.send(message);
         // send email with user credentials
 
-        var jwt = jwtService.generateToken(user);
         return new ResponseEntity<>(
                 BasicResponse.<AuthResponse>builder()
-                        .data_count(1)
-                        .data(
-                                AuthResponse.builder()
-                                        .token(jwt)
-                                        .user(user)
-                                        .build()
-                        )
+                        .message("user created successfully their credentials have been sent to the email address provided")
                         .build(),
                 HttpStatus.CREATED
         );
