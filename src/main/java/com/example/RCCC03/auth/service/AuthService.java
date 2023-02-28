@@ -6,6 +6,7 @@ import com.example.RCCC03.auth.repository.UserRepository;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -41,10 +43,58 @@ public class AuthService {
     private final CustomerRepository customerRepo;
     private final RoleRepository roleRepo;
 
+
+    public BasicResponse<String> forgotPassword(RegisterRequest registerRequest) throws MessagingException {
+
+        long otp_duration = 1;
+        User user = userRepo.findByEmail(registerRequest.getEmail()).orElseThrow();
+        String otp = generateOtp();
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+        helper.setFrom("robertocastillodev@gmail.com");
+        helper.setTo(registerRequest.getEmail());
+        helper.setSubject("Evaluacion tecnica - Codigo de desbloqueo");
+        helper.setText(
+                String.format("""
+                        <img style="width:70vw;" src="https://ci3.googleusercontent.com/proxy/FlGICNOLfVc2LF1W0xlETyPvVi5jXJxo6auBUbmEnekCLJj4TpSkrUsXZSINgdqgY9uWWStSSrf-rTGQ_1jjebcpLWJneVBg3D6oyKuSzkif5s9u=s0-d-e1-ft#https://www.bancatlan.hn/img/Encabezado_PS05_AOL_716x462px-01.png" alt="banner banco atlantidad"/>
+                        <h1>Evaluacion tecnica Roberto Castillo</h1> 
+                        <p>Estimado(a) %s </p>
+                        <p>Este codigo permanecera activo durante %s minutos</p>
+                        <p style="font-size:25px;">Usuario: %s <br/>Codigo de verificacion: <b>%s</b></p>
+                        <a href="http://localhost:3000">Ingresa a la banca en linea y configura tu nueva contraseña</a>
+                        """, registerRequest.getEmail(), otp_duration, registerRequest.getEmail(), otp),
+                true
+        );
+        javaMailSender.send(message);
+        user.setOtp(otp);
+        user.setOtp_expires_in(LocalDateTime.now().plus(otp_duration, ChronoUnit.MINUTES));
+        userRepo.save(user);
+        return BasicResponse
+                .<String>builder()
+                .message("An OTP was send to the user email, send the OTP and the new password to PUT - /auth/password")
+                .build();
+    }
+
     public User info(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
         user.setPassword(null);
         return user;
+    }
+
+    public String generateOtp() {
+
+        char[] possibleCharacters = (
+                "0123456789"
+        ).toCharArray();
+        return RandomStringUtils.random(
+                8,
+                0,
+                possibleCharacters.length - 1,
+                false,
+                false,
+                possibleCharacters,
+                new SecureRandom()
+        );
     }
 
     public String generateStrongPassword() {
@@ -199,4 +249,31 @@ public class AuthService {
         return roleRepo.findById(id).orElseThrow();
     }
 
+    public ResponseEntity<BasicResponse<AuthResponse>> updatePassword(User body) {
+        User user = userRepo.findByEmail(body.getEmail()).orElseThrow();
+        if (
+                user.getOtp_expires_in().isBefore(LocalDateTime.now())
+        ) return new ResponseEntity<>(
+                BasicResponse
+                        .<AuthResponse>builder()
+                        .error("Otp expired")
+                        .build()
+                , HttpStatus.UNAUTHORIZED);
+        if (
+                !Objects.equals(user.getOtp(), body.getOtp())
+        ) return new ResponseEntity<>(
+                BasicResponse
+                        .<AuthResponse>builder()
+                        .error("invalid otp")
+                        .build()
+                , HttpStatus.UNAUTHORIZED);
+        user.setPassword(passwordEncoder.encode(body.getPassword()));
+        userRepo.save(user);
+        return  new ResponseEntity<>(
+                BasicResponse
+                        .<AuthResponse>builder()
+                        .message("password updated successfully")
+                        .build()
+                , HttpStatus.UNAUTHORIZED);
+    }
 }

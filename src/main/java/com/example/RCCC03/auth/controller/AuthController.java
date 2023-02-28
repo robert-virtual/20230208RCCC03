@@ -22,6 +22,16 @@ public class AuthController {
     public ResponseEntity<BasicResponse<AuthResponse>> login(@RequestBody LoginRequest body) {
        return ResponseEntity.ok(authService.login(body));
     }
+    @PutMapping("/password")
+    public ResponseEntity<BasicResponse<AuthResponse>> updatePassword(
+            @RequestBody User body
+    ) throws Exception {
+        return authService.updatePassword(body);
+    }
+    @PostMapping("/password")
+    public BasicResponse<String> forgotPassword(@RequestBody RegisterRequest body) throws Exception {
+        return authService.forgotPassword(body);
+    }
     @PostMapping("/register")
     public ResponseEntity<BasicResponse<AuthResponse>> register(@RequestBody RegisterRequest body) throws Exception {
         return authService.register(body);
