@@ -80,7 +80,6 @@ public class TransactionService {
                 return accountRepo.save(source_account);
             });
         });
-        System.out.println(transaction.getAccount().getAccount_number());
         Account target_account = accountRepo.findById(
                 transaction
                         .getAccount()
@@ -218,12 +217,15 @@ public class TransactionService {
             transaction.setDetails(new ArrayList<>());
             long transaction_id = transactionRepo.save(transaction).getId();
             details = details.stream().peek(detail -> {
-                Account target_account = accountRepo.findById(detail.getTargetAccount()).orElseThrow();
-
-                Customer target_customer = customerRepo.findById(
-                        target_account.getCustomerId()
-                ).orElseThrow();
-                detail.setAccount_holder(target_customer.getName());
+                // if the transaction is not ACH query account information
+                System.out.println(transaction.getTransaction_type().getId());
+                if(transaction.getTransaction_type().getId() != 3){
+                    Account target_account = accountRepo.findById(detail.getTargetAccount()).orElseThrow();
+                    Customer target_customer = customerRepo.findById(
+                            target_account.getCustomerId()
+                    ).orElseThrow();
+                    detail.setAccount_holder(target_customer.getName());
+                }
                 detail.setTransaction_id(transaction_id);
             }).toList();
 
@@ -287,26 +289,27 @@ public class TransactionService {
         double available_balance = Double.parseDouble(
                 source_account.getAvailable_balance()
         ) - total_debit;
-        System.out.printf("total_debit: %s, available_balance: %s%n", total_debit, available_balance);
         source_account.setAvailable_balance(
                 Double.toString(available_balance)
         );
         accountRepo.save(source_account);
         // --------------------------------------------
-        details.forEach(detail -> {
-            accountRepo.findById(detail.getTargetAccount()).map(target_account -> {
-                double credit = Double.parseDouble(
-                        detail.getAmount()
-                );
-                double target_available_balance = Double.parseDouble(
-                        target_account.getAvailable_balance()
-                ) + credit;
-                target_account.setAvailable_balance(
-                        Double.toString(target_available_balance)
-                );
-                return accountRepo.save(target_account);
+        if(transaction.getTransaction_type().getId() != 3){
+            details.forEach(detail -> {
+                accountRepo.findById(detail.getTargetAccount()).map(target_account -> {
+                    double credit = Double.parseDouble(
+                            detail.getAmount()
+                    );
+                    double target_available_balance = Double.parseDouble(
+                            target_account.getAvailable_balance()
+                    ) + credit;
+                    target_account.setAvailable_balance(
+                            Double.toString(target_available_balance)
+                    );
+                    return accountRepo.save(target_account);
+                });
             });
-        });
+        }
         // --------------------------------------------
         // update transaction
         transaction.setStatus(
