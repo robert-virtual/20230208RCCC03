@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
@@ -34,6 +35,8 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class AuthService {
 
+    @Value("${app.otp.duration}")
+    private long otp_duration;
     private final JavaMailSender javaMailSender;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -46,7 +49,6 @@ public class AuthService {
 
     public BasicResponse<String> forgotPassword(RegisterRequest registerRequest) throws MessagingException {
 
-        long otp_duration = 1;
         User user = userRepo.findByEmail(registerRequest.getEmail()).orElseThrow();
         String otp = generateOtp();
         MimeMessage message = javaMailSender.createMimeMessage();
