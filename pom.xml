@@ -86,7 +86,16 @@
 			<artifactId>httpclient</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<!--		email sending-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<!--		generate strong password-->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

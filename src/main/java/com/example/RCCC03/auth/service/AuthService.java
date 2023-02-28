@@ -6,24 +6,31 @@ import com.example.RCCC03.auth.repository.UserRepository;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    private final JavaMailSender javaMailSender;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
@@ -34,10 +41,25 @@ public class AuthService {
 
     public User info(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
-       user.setPassword(null);
+        user.setPassword(null);
         return user;
     }
 
+    public String generateStrongPassword(){
+
+        char[] possibleCharacters = (
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&()-_=+[{]}\\|;:'\",<.>/?"
+        ).toCharArray();
+        return RandomStringUtils.random(
+                8,
+                0,
+                possibleCharacters.length - 1,
+                false,
+                false,
+                possibleCharacters,
+                new SecureRandom()
+        );
+    }
     public BasicResponse<AuthResponse> login(LoginRequest loginRequest) {
         User user;
         try {
@@ -49,7 +71,7 @@ public class AuthService {
                     .error("Bad credentials")
                     .build();
         }
-        if (user.getFailed_logins() >= 5 ){
+        if (user.getFailed_logins() >= 5) {
             user.setStatus(false);
             userRepo.save(user);
             return BasicResponse
@@ -66,7 +88,7 @@ public class AuthService {
             );
 
         } catch (Exception e) {
-            user.setFailed_logins(user.getFailed_logins()+1);
+            user.setFailed_logins(user.getFailed_logins() + 1);
             userRepo.save(user);
             return BasicResponse
                     .<AuthResponse>builder()
@@ -101,10 +123,24 @@ public class AuthService {
                 .build();
     }
 
-    public ResponseEntity<BasicResponse<AuthResponse>> register(RegisterRequest registerRequest) throws Exception {
+    @Transactional
+    public ResponseEntity<BasicResponse<AuthResponse>> register(
+            RegisterRequest registerRequest
+    ) throws Exception {
         // verify that the user has permission to create accounts
-        var authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
-        if (authorities.stream().noneMatch(authority -> authority.getAuthority().matches("accounts_creator"))) {
+        var authorities = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getAuthorities();
+        if (
+                authorities
+                        .stream()
+                        .noneMatch(
+                                authority -> authority
+                                        .getAuthority()
+                                        .matches("accounts_creator")
+                        )
+        ) {
 
             return new ResponseEntity<>(
                     BasicResponse.<AuthResponse>builder()
@@ -113,6 +149,7 @@ public class AuthService {
                     HttpStatus.UNAUTHORIZED
             );
         }
+        String strongPassword = generateStrongPassword();
         var user = User.builder()
                 .customerId(registerRequest.getCustomer_id())
                 .email(registerRequest.getEmail())
@@ -120,9 +157,24 @@ public class AuthService {
                 .created_at(LocalDateTime.now())
                 .failed_logins(0)
                 .status(true)
-                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .password(
+                        passwordEncoder.encode(strongPassword)
+                )
                 .build();
         userRepo.save(user);
+        // remove encrypted password
+        user.setPassword(null);
+        // remove encrypted password
+
+        // send email with user credentials
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("robertocastillodev@gmail.com");
+        message.setTo(registerRequest.getEmail());
+        message.setSubject("Tu usuario y contraseña para la banca en linea");
+        message.setText(String.format("Usuario: %s, Contraseña: %s",registerRequest.getEmail(),strongPassword));
+        javaMailSender.send(message);
+        // send email with user credentials
+
         var jwt = jwtService.generateToken(user);
         return new ResponseEntity<>(
                 BasicResponse.<AuthResponse>builder()
