@@ -2,13 +2,11 @@ package com.example.RCCC03.transaction.service;
 
 import com.example.RCCC03.account.model.Account;
 import com.example.RCCC03.account.repository.AccountRepository;
-import com.example.RCCC03.auth.model.AuthResponse;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
-import com.example.RCCC03.transaction.dto.DebitEmployees;
 import com.example.RCCC03.transaction.model.Transaction;
 import com.example.RCCC03.transaction.model.TransactionDetail;
 import com.example.RCCC03.transaction.model.TransactionStatus;

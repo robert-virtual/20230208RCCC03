@@ -3,12 +3,15 @@ package com.example.RCCC03.transaction.model;
 import com.example.RCCC03.account.model.Account;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "transactions")
+@Audited
 @Data
 public class Transaction {
     @Id
@@ -21,6 +24,7 @@ public class Transaction {
     //private long source_account;
     @ManyToOne
     @JoinColumn(name = "transaction_type",referencedColumnName = "id")
+    @NotAudited
     private TransactionType transaction_type;
     // private int transaction_type;
     private String currency;
@@ -28,6 +32,7 @@ public class Transaction {
     private LocalDateTime authorized_at;
     @ManyToOne
     @JoinColumn(name = "status",referencedColumnName = "id")
+    @NotAudited
     private TransactionStatus status;
     //private int status;
     private String notes;
