@@ -57,8 +57,8 @@ public class Customer {
     @ManyToMany
     @JoinTable(
             name = "company_employee",
-            joinColumns = @JoinColumn(name = "employee_id",referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "company_id",referencedColumnName = "id")
+            joinColumns = @JoinColumn(name = "company_id",referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "employee_id",referencedColumnName = "id")
     )
     private List<Customer> employees = new ArrayList<>();
     public void addEmployee(Customer employee){

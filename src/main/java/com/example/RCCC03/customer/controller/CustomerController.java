@@ -162,7 +162,7 @@ public class CustomerController {
     }
 
     @PostMapping("/employee")
-    ResponseEntity<Map<String, Object>> addEmployee(@RequestBody Map<String, String> body) {
+    ResponseEntity<BasicResponse<String>> addEmployee(@RequestBody Map<String, String> body) {
         String employee_dni = body.get("employee_dni");
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepo.findByEmail(userEmail).orElseThrow();
@@ -171,10 +171,11 @@ public class CustomerController {
             company.addEmployee(employee);
             return customerRepo.save(company);
         });
-        Map<String, Object> res = new HashMap<>();
-        res.put("message", employee.getName() + " successfully added to the company");
         return ResponseEntity.ok(
-                res
+                BasicResponse
+                        .<String>builder()
+                        .message(employee.getName() + " successfully added to the company")
+                        .build()
         );
     }
 }
