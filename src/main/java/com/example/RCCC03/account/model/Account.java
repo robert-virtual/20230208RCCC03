@@ -5,12 +5,10 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Audited
 @Data
 @AllArgsConstructor
 @Builder

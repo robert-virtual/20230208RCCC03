@@ -3,10 +3,8 @@ package com.example.RCCC03.transaction.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 
 @Entity(name = "transaction_detail")
-@Audited
 @Data
 @Builder
 @NoArgsConstructor
