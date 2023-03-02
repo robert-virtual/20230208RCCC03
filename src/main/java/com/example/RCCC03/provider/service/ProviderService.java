@@ -3,6 +3,7 @@ package com.example.RCCC03.provider.service;
 
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
+import com.example.RCCC03.config.AuditLogService;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.provider.model.Provider;
 import com.example.RCCC03.provider.model.ServiceProvider;
@@ -18,23 +19,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProviderService {
     private final ProviderRepository providerRepo;
+    private final AuditLogService auditLogService;
     private final UserRepository userRepo;
     private final ServiceRepository serviceRepo;
 
-    public BasicResponse<List<Service>> getAllServices(long provider_id){
+    public BasicResponse<List<Service>> getAllServices(long provider_id) {
         Provider provider = providerRepo.findById(provider_id).orElseThrow();
         var services = provider.getServices();
-        return  BasicResponse.<List<Service>>builder()
+        return BasicResponse.<List<Service>>builder()
                 .data(services)
                 .data_count(services.size())
                 .build();
     }
-    public BasicResponse<List<Provider>> getAll(){
+
+    public BasicResponse<List<Provider>> getAll() {
         var providers = providerRepo.findAll();
-       return  BasicResponse.<List<Provider>>builder()
-               .data_count(providers.size())
-               .data(providers)
-               .build();
+        return BasicResponse.<List<Provider>>builder()
+                .data_count(providers.size())
+                .data(providers)
+                .build();
     }
 
     public Provider update(Provider body, long provider_id) throws Exception {
@@ -42,38 +45,43 @@ public class ProviderService {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepo.findByEmail(userEmail).orElseThrow();
         Provider provider = providerRepo.findById(provider_id).orElseThrow();
-        if (provider.getCustomerId() != user.getCustomerId()){
-            throw  new Exception("the provider does not belong to the user requesting the action");
+        if (provider.getCustomerId() != user.getCustomerId()) {
+            throw new Exception("the provider does not belong to the user requesting the action");
         }
         provider.setName(body.getName());
-        return providerRepo.save(provider);
+        providerRepo.save(provider);
+        auditLogService.audit("update provider", provider, user);
+        return provider;
     }
 
     public Provider createProvider(Provider provider) throws Exception {
         // verify that the user has permission to create providers
         var authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
-        if (authorities.stream().noneMatch(authority->authority.getAuthority().matches("accounts_creator"))){
+        if (authorities.stream().noneMatch(authority -> authority.getAuthority().matches("accounts_creator"))) {
             System.out.println("User does not have permission to create providers");
             throw new Exception("User does not have permission to create providers");
         }
         User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
         provider.setCustomerId(user.getCustomerId());
-        return providerRepo.save(provider);
+        auditLogService.audit("create provider", provider, user);
+        providerRepo.save(provider);
+        return provider;
 
     }
 
 
-    public BasicResponse addServiceToProvider(ServiceProvider serviceProvider) throws Exception {
+    public BasicResponse<String> addServiceToProvider(ServiceProvider serviceProvider) throws Exception {
         User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
         Provider provider = providerRepo.findById(serviceProvider.getProvider_id()).orElseThrow();
-        if (provider.getCustomerId() != user.getCustomerId()){
+        if (provider.getCustomerId() != user.getCustomerId()) {
             throw new Exception("the given provider id does not belong to the user");
         }
         Service service = serviceRepo.findById(serviceProvider.getService_id()).orElseThrow();
         provider.addService(service);
         providerRepo.save(provider);
+        auditLogService.audit("add service to provider", provider, user);
         return BasicResponse
-                .builder()
+                .<String>builder()
                 .message("Service added successfully")
                 .build();
 
