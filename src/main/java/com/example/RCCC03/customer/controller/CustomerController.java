@@ -65,11 +65,6 @@ public class CustomerController {
         return customerService.disable();
     }
 
-    @DeleteMapping("/delete")
-    ResponseEntity<BasicResponse<Object>> delete(
-    ) {
-        return customerService.delete();
-    }
 
     @GetMapping("/employee")
     public BasicResponse<List<Customer>> getEmployees() {

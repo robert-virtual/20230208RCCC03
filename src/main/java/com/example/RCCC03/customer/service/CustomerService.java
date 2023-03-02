@@ -4,11 +4,11 @@ import com.example.RCCC03.account.model.Account;
 import com.example.RCCC03.account.repository.AccountRepository;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
+import com.example.RCCC03.config.AuditLogService;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -19,6 +19,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
+    private final AuditLogService auditLogService;
     private final CustomerRepository customerRepo;
     private final AccountRepository accountRepo;
     private final UserRepository userRepo;
@@ -59,16 +60,19 @@ public class CustomerService {
     public ResponseEntity<Customer> update(Customer body) {
         User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
         long customer_id = user.getCustomerId();
+
+        Customer customer = customerRepo.findById(customer_id).map(customer_ -> {
+            if (body.getName() != null) customer_.setName(body.getName());
+            if (body.getEmail() != null) customer_.setEmail(body.getEmail());
+            if (body.getLastname() != null) customer_.setLastname(body.getLastname());
+            if (body.getPhone() != null) customer_.setPhone(body.getPhone());
+            if (body.getAddress_1() != null) customer_.setAddress_1(body.getAddress_1());
+            if (body.getAddress_2() != null) customer_.setAddress_2(body.getAddress_2());
+            return customerRepo.save(customer_);
+        }).orElseThrow();
+       auditLogService.audit("update customer",customer,user);
         return ResponseEntity.ok(
-                customerRepo.findById(customer_id).map(customer -> {
-                    if (body.getName() != null) customer.setName(body.getName());
-                    if (body.getEmail() != null) customer.setEmail(body.getEmail());
-                    if (body.getLastname() != null) customer.setLastname(body.getLastname());
-                    if (body.getPhone() != null) customer.setPhone(body.getPhone());
-                    if (body.getAddress_1() != null) customer.setAddress_1(body.getAddress_1());
-                    if (body.getAddress_2() != null) customer.setAddress_2(body.getAddress_2());
-                    return customerRepo.save(customer);
-                }).orElseThrow()
+               customer
         );
     }
 
@@ -83,6 +87,7 @@ public class CustomerService {
 
         customer.setStatus("inactive");
         customerRepo.save(customer);
+        auditLogService.audit("disable customer",customer,user);
         return ResponseEntity.ok(
                 BasicResponse
                         .builder()
@@ -91,18 +96,6 @@ public class CustomerService {
         );
     }
 
-    public ResponseEntity<BasicResponse<Object>> delete() {
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepo.findByEmail(userEmail).orElseThrow();
-        userRepo.deleteAllByCustomerId(user.getCustomerId());
-        customerRepo.deleteById(user.getCustomerId());
-        return ResponseEntity.ok(
-                BasicResponse
-                        .builder()
-                        .message("customer and related users deleted successfully")
-                        .build()
-        );
-    }
 
     public BasicResponse<List<Customer>> getEmployees() {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -138,7 +131,9 @@ public class CustomerService {
     }
 
     public ResponseEntity<Customer> create(Customer body) {
-        return ResponseEntity.ok(customerRepo.save(body));
+       Customer customer = customerRepo.save(body);
+        auditLogService.audit("disable customer",customer);
+        return ResponseEntity.ok(customer);
     }
 
     public ResponseEntity<Customer> getOne(long id) {
@@ -157,4 +152,6 @@ public class CustomerService {
         User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
         return customerRepo.findById(user.getCustomerId()).orElseThrow();
     }
+
+
 }
