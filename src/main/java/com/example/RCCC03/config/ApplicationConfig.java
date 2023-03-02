@@ -50,7 +50,9 @@ public class ApplicationConfig {
     private final AccountTypeRepository accountTypeRepo;
     private final AccountStatusRepository accountStatusRepo;
 
-    @Value("spring.mail.password}")
+    @Value("${spring.mail.username}")
+    private String mailUser;
+    @Value("${spring.mail.password}")
     private String mailPassword;
 
     @EventListener
@@ -196,7 +198,7 @@ public class ApplicationConfig {
         mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);
 
-        mailSender.setUsername("robertocastillodev@gmail.com");
+        mailSender.setUsername(mailUser);
         mailSender.setPassword(mailPassword);
 
         Properties props = mailSender.getJavaMailProperties();

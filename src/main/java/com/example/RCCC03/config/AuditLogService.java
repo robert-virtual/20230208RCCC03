@@ -17,7 +17,7 @@ public class AuditLogService {
     private final UserRepository userRepo;
 
     public void audit(
-            String action ,
+            String action,
             Object data,
             User user
     ) {
@@ -45,13 +45,20 @@ public class AuditLogService {
             );
         }
     }
+
     public void audit(
-            String action ,
+            String action,
             Object data
     ) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepo.findByEmail(email).orElseThrow();
-        audit(action,data,user);
+        try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userRepo.findByEmail(email).orElseThrow();
+            audit(action, data, user);
+        } catch (Exception e) {
+            User user = userRepo.findByEmail("admin@admin.com").orElseThrow();
+            audit(action, data, user);
+
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.example.RCCC03.auth.service;
 import com.example.RCCC03.auth.model.*;
 import com.example.RCCC03.auth.repository.RoleRepository;
 import com.example.RCCC03.auth.repository.UserRepository;
+import com.example.RCCC03.config.AuditLogService;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
@@ -11,11 +12,9 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,6 +34,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class AuthService {
 
+    private final AuditLogService auditLogService;
     @Value("${app.otp.duration}")
     private long otp_duration;
     private final JavaMailSender javaMailSender;
@@ -71,6 +71,7 @@ public class AuthService {
         user.setOtp(otp);
         user.setOtp_expires_in(LocalDateTime.now().plus(otp_duration, ChronoUnit.MINUTES));
         userRepo.save(user);
+       auditLogService.audit("otp requested",user,user);
         return BasicResponse
                 .<String>builder()
                 .message("An OTP was send to the user email, send the OTP and the new password to PUT - /auth/password")
@@ -121,6 +122,10 @@ public class AuthService {
             user = userRepo.findByEmail(loginRequest.getEmail())
                     .orElseThrow();
         } catch (Exception e) {
+            auditLogService.audit(
+                    "login attempt failed email not found",
+                    null
+            );
             return BasicResponse
                     .<AuthResponse>builder()
                     .error("Bad credentials")
@@ -129,6 +134,11 @@ public class AuthService {
         if (user.getFailed_logins() >= 5) {
             user.setStatus(false);
             userRepo.save(user);
+            auditLogService.audit(
+                    "User blocked after 5 failed logins attempts",
+                    user,
+                    user
+            );
             return BasicResponse
                     .<AuthResponse>builder()
                     .error("User blocked after 5 failed logins attempts")
@@ -145,6 +155,11 @@ public class AuthService {
         } catch (Exception e) {
             user.setFailed_logins(user.getFailed_logins() + 1);
             userRepo.save(user);
+            auditLogService.audit(
+                    "login attempt failed wrong password",
+                    user,
+                    user
+            );
             return BasicResponse
                     .<AuthResponse>builder()
                     .error(e.getMessage())
@@ -159,6 +174,11 @@ public class AuthService {
             List<String> entities = new ArrayList<>();
             if (inactive) entities.add("Customer");
             if (!user.isStatus()) entities.add("User");
+            auditLogService.audit(
+                    "login attempt failed inactive user or customer",
+                    user,
+                    user
+            );
             return BasicResponse.<AuthResponse>builder()
                     .error(String.join(" and ", entities) + " disabled")
                     .build();
@@ -168,6 +188,11 @@ public class AuthService {
         userRepo.save(user);
         // to avoid returning the user his encrypted password (security reasons)
         user.setPassword(null);
+        auditLogService.audit(
+                "login attempt successful",
+                user,
+                user
+        );
         return BasicResponse.<AuthResponse>builder()
                 .data(
                         AuthResponse.builder()
@@ -187,6 +212,8 @@ public class AuthService {
                 .getContext()
                 .getAuthentication()
                 .getAuthorities();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User loggedUser = userRepo.findByEmail(email).orElseThrow();
         if (
                 authorities
                         .stream()
@@ -197,6 +224,11 @@ public class AuthService {
                         )
         ) {
 
+            auditLogService.audit(
+                    "User does not have permission to create users",
+                    loggedUser,
+                    loggedUser
+            );
             return new ResponseEntity<>(
                     BasicResponse.<AuthResponse>builder()
                             .error("User does not have permission to create users")
@@ -216,7 +248,13 @@ public class AuthService {
                         passwordEncoder.encode(strongPassword)
                 )
                 .build();
+
         userRepo.save(user);
+        auditLogService.audit(
+                "user created",
+                user,
+                loggedUser
+        );
 
         // send email with user credentials
         MimeMessage message = javaMailSender.createMimeMessage();
@@ -255,23 +293,31 @@ public class AuthService {
         User user = userRepo.findByEmail(body.getEmail()).orElseThrow();
         if (
                 user.getOtp_expires_in().isBefore(LocalDateTime.now())
-        ) return new ResponseEntity<>(
-                BasicResponse
-                        .<AuthResponse>builder()
-                        .error("Otp expired")
-                        .build()
-                , HttpStatus.UNAUTHORIZED);
+        ) {
+            auditLogService.audit("update password failed due to expired otp", user, user);
+            return new ResponseEntity<>(
+                    BasicResponse
+                            .<AuthResponse>builder()
+                            .error("Otp expired")
+                            .build()
+                    , HttpStatus.UNAUTHORIZED);
+        }
         if (
                 !Objects.equals(user.getOtp(), body.getOtp())
-        ) return new ResponseEntity<>(
-                BasicResponse
-                        .<AuthResponse>builder()
-                        .error("invalid otp")
-                        .build()
-                , HttpStatus.UNAUTHORIZED);
+        ) {
+            auditLogService.audit("update password failed due to invalid otp", user, user);
+            return new ResponseEntity<>(
+                    BasicResponse
+                            .<AuthResponse>builder()
+                            .error("invalid otp")
+                            .build()
+                    , HttpStatus.UNAUTHORIZED);
+        }
         user.setPassword(passwordEncoder.encode(body.getPassword()));
         userRepo.save(user);
-        return  new ResponseEntity<>(
+
+        auditLogService.audit("update password successful", user, user);
+        return new ResponseEntity<>(
                 BasicResponse
                         .<AuthResponse>builder()
                         .message("password updated successfully")
