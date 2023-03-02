@@ -31,38 +31,38 @@ public class CustomerController {
     public ResponseEntity<Customer> getOne(
             @PathVariable long id
     ) {
-        return customerService.getOne(id);
+        return ResponseEntity.ok(customerService.getOne(id));
     }
 
     @GetMapping("/account")
     public ResponseEntity<BasicResponse<List<Account>>> getCustomerAccounts(
     ) {
-        return customerService.getCustomerAccounts();
+        return ResponseEntity.ok(customerService.getCustomerAccounts());
     }
 
     @GetMapping("/{customer_id}/account")
     public ResponseEntity<BasicResponse<List<Account>>> getAccounts(
             @PathVariable long customer_id
     ) {
-        return customerService.getAccounts(customer_id);
+        return ResponseEntity.ok(customerService.getAccounts(customer_id));
     }
 
     @PostMapping("/create")
     ResponseEntity<Customer> create(@RequestBody Customer body) {
-        return customerService.create(body);
+        return ResponseEntity.ok(customerService.create(body));
     }
 
     @PutMapping("/update")
     ResponseEntity<Customer> update(
             @RequestBody Customer body
     ) {
-        return customerService.update(body);
+        return ResponseEntity.ok(customerService.update(body));
     }
 
     @DeleteMapping("/disable")
     ResponseEntity<BasicResponse<Object>> disable(
     ) {
-        return customerService.disable();
+        return ResponseEntity.ok(customerService.disable());
     }
 
 
@@ -73,6 +73,6 @@ public class CustomerController {
 
     @PostMapping("/employee")
     ResponseEntity<BasicResponse<String>> addEmployee(@RequestBody Map<String, String> body) {
-        return customerService.addEmployee(body);
+        return ResponseEntity.ok(customerService.addEmployee(body));
     }
 }

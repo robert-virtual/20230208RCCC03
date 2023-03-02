@@ -23,41 +23,38 @@ public class CustomerService {
     private final CustomerRepository customerRepo;
     private final AccountRepository accountRepo;
     private final UserRepository userRepo;
-   public ResponseEntity<BasicResponse<List<Account>>> getCustomerAccounts(){
+   public BasicResponse<List<Account>> getCustomerAccounts(){
 
         try {
             String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userRepo.findByEmail(userEmail).orElseThrow();
             List<Account> accounts = accountRepo.findAllByCustomerId(user.getCustomerId());
-            return ResponseEntity.ok(
-                    BasicResponse.<List<Account>>builder()
+            return BasicResponse.<List<Account>>builder()
                             .data_count(accounts.size())
                             .data(accounts)
                             .build()
-            );
+;
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return ResponseEntity.ok(
-                    BasicResponse.<List<Account>>builder()
+            return BasicResponse.<List<Account>>builder()
                             .error(e.getMessage())
                             .build()
-            );
+;
         }
     }
 
-    public ResponseEntity<BasicResponse<List<Account>>> getAccounts(long customer_id) {
+    public BasicResponse<List<Account>> getAccounts(long customer_id) {
 
         Customer customer = customerRepo.findById(customer_id).orElseThrow();
         List<Account> accounts = customer.getAccounts();
-        return ResponseEntity.ok(
-                BasicResponse.<List<Account>>builder()
+        return BasicResponse.<List<Account>>builder()
                         .data_count(accounts.size())
                         .data(accounts)
                         .build()
-        );
+;
     }
 
-    public ResponseEntity<Customer> update(Customer body) {
+    public Customer update(Customer body) {
         User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
         long customer_id = user.getCustomerId();
 
@@ -71,12 +68,10 @@ public class CustomerService {
             return customerRepo.save(customer_);
         }).orElseThrow();
        auditLogService.audit("update customer",customer,user);
-        return ResponseEntity.ok(
-               customer
-        );
+        return customer;
     }
 
-    public ResponseEntity<BasicResponse<Object>> disable() {
+    public BasicResponse<Object> disable() {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepo.findByEmail(userEmail).orElseThrow();
         Customer customer = customerRepo.findById(user.getCustomerId()).orElseThrow();
@@ -88,12 +83,11 @@ public class CustomerService {
         customer.setStatus("inactive");
         customerRepo.save(customer);
         auditLogService.audit("disable customer",customer,user);
-        return ResponseEntity.ok(
-                BasicResponse
+        return BasicResponse
                         .builder()
                         .message("user disabled successfully")
                         .build()
-        );
+;
     }
 
 
@@ -113,7 +107,7 @@ public class CustomerService {
                 .build();
     }
 
-    public ResponseEntity<BasicResponse<String>> addEmployee(Map<String, String> body) {
+    public BasicResponse<String> addEmployee(Map<String, String> body) {
         String employee_dni = body.get("employee_dni");
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepo.findByEmail(userEmail).orElseThrow();
@@ -122,22 +116,22 @@ public class CustomerService {
             company.addEmployee(employee);
             return customerRepo.save(company);
         });
-        return ResponseEntity.ok(
-                BasicResponse
+        auditLogService.audit("add employee to company",employee,user);
+        return BasicResponse
                         .<String>builder()
                         .message(employee.getName() + " successfully added to the company")
                         .build()
-        );
+;
     }
 
-    public ResponseEntity<Customer> create(Customer body) {
+    public Customer create(Customer body) {
        Customer customer = customerRepo.save(body);
-        auditLogService.audit("disable customer",customer);
-        return ResponseEntity.ok(customer);
+        auditLogService.audit("create customer",customer);
+        return customer;
     }
 
-    public ResponseEntity<Customer> getOne(long id) {
-        return ResponseEntity.ok(customerRepo.findById(id).orElseThrow());
+    public Customer getOne(long id) {
+        return customerRepo.findById(id).orElseThrow();
     }
 
     public BasicResponse<List<Customer>> getAll(boolean company) {

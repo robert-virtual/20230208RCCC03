@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -25,7 +24,7 @@ public class AuthController {
     @PutMapping("/password")
     public ResponseEntity<BasicResponse<AuthResponse>> updatePassword(
             @RequestBody User body
-    ) throws Exception {
+    ) {
         return authService.updatePassword(body);
     }
     @PostMapping("/password")
