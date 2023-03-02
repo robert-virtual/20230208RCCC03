@@ -51,6 +51,9 @@ public class ApplicationConfig {
     private final AccountTypeRepository accountTypeRepo;
     private final AccountStatusRepository accountStatusRepo;
 
+    @Value("spring.mail.password}")
+    private String mailPassword;
+
     @EventListener
     public void seed(ContextRefreshedEvent event) {
         seedUsers();
@@ -195,7 +198,7 @@ public class ApplicationConfig {
         mailSender.setPort(587);
 
         mailSender.setUsername("robertocastillodev@gmail.com");
-        mailSender.setPassword("lcjqaeoivcmuayow");
+        mailSender.setPassword(mailPassword);
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
