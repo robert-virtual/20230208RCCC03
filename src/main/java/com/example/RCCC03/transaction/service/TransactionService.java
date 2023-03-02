@@ -4,6 +4,7 @@ import com.example.RCCC03.account.model.Account;
 import com.example.RCCC03.account.repository.AccountRepository;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
+import com.example.RCCC03.config.AuditLogService;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
@@ -13,6 +14,7 @@ import com.example.RCCC03.transaction.model.TransactionStatus;
 import com.example.RCCC03.transaction.model.TransactionType;
 import com.example.RCCC03.transaction.repository.TransactionDetailRepository;
 import com.example.RCCC03.transaction.repository.TransactionRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class TransactionService {
     private final TransactionRepository transactionRepo;
+    private final AuditLogService auditLogService;
     private final TransactionDetailRepository transactionDetailsRepo;
     private final CustomerRepository customerRepo;
     private final UserRepository userRepo;
@@ -43,13 +46,19 @@ public class TransactionService {
                 user.getAuthorities().stream().noneMatch(
                         authority -> Objects.equals(authority.getAuthority(), "authorizer")
                 )
-        ) return BasicResponse.<Transaction>builder()
-                .error("the user does not have the required role to perform the action")
-                .build();
-        if (transaction.getStatus().getId() == 2) return BasicResponse
-                .<Transaction>builder()
-                .error("Transaction already authorized")
-                .build();
+        ) {
+            auditLogService.audit("the user does not have the required role to perform the action", transaction, user);
+            return BasicResponse.<Transaction>builder()
+                    .error("the user does not have the required role to perform the action")
+                    .build();
+        }
+        if (transaction.getStatus().getId() == 2) {
+            auditLogService.audit("Transaction already authorized", transaction, user);
+            return BasicResponse
+                    .<Transaction>builder()
+                    .error("Transaction already authorized")
+                    .build();
+        }
 
         transaction.setStatus(
                 TransactionStatus
@@ -60,6 +69,7 @@ public class TransactionService {
         transaction.setAuthorized_at(LocalDateTime.now());
         transaction.setAuthorized_by(userEmail);
         transactionRepo.save(transaction);
+        auditLogService.audit("transaction authorized", transaction, user);
         double total_credit = details.stream().mapToDouble(
                 detail -> Double.parseDouble(detail.getAmount())
         ).sum();
@@ -75,7 +85,9 @@ public class TransactionService {
                 source_account.setAvailable_balance(
                         Double.toString(available_balance)
                 );
-                return accountRepo.save(source_account);
+                accountRepo.save(source_account);
+                auditLogService.audit("account updated", source_account, user);
+                return source_account;
             });
         });
         Account target_account = accountRepo.findById(
@@ -92,6 +104,7 @@ public class TransactionService {
                 Double.toString(available_balance)
         );
         accountRepo.save(target_account);
+        auditLogService.audit("account updated", target_account, user);
         // --------------------------------------------
 
         return BasicResponse
@@ -101,6 +114,7 @@ public class TransactionService {
                 .build();
     }
 
+    @Transactional
     public BasicResponse<Transaction> debitEmployees(Transaction transaction) {
         try {
             String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -109,10 +123,13 @@ public class TransactionService {
             Account target_account = accountRepo.findById(transaction.getAccount().getAccount_number()).orElseThrow();
             if (
                     target_account.getCustomerId() != user.getCustomerId()
-            ) return BasicResponse
-                    .<Transaction>builder()
-                    .error("the account does not belong to the user requesting the action")
-                    .build();
+            ) {
+                auditLogService.audit("the account does not belong to the user requesting the action", target_account, user);
+                return BasicResponse
+                        .<Transaction>builder()
+                        .error("the account does not belong to the user requesting the action")
+                        .build();
+            }
 
             transaction.setOperated_at(LocalDateTime.now());
             transaction.setOperated_by(userEmail);
@@ -133,6 +150,7 @@ public class TransactionService {
             );
             // save transaction
             long transaction_id = transactionRepo.save(transaction).getId();
+            auditLogService.audit("transaction created", transaction, user);
             employees.forEach(
                     employee -> {
                         details.add(
@@ -162,6 +180,7 @@ public class TransactionService {
             );
 
             transactionDetailsRepo.saveAll(details);
+            auditLogService.audit("transaction details created", details, user);
             transaction.setDetails(details);
             return BasicResponse
                     .<Transaction>builder()
@@ -170,6 +189,7 @@ public class TransactionService {
                     .build();
 
         } catch (Exception e) {
+            auditLogService.audit("error creating transaction", null);
             return BasicResponse
                     .<Transaction>builder()
                     .error(e.getMessage())
@@ -178,6 +198,7 @@ public class TransactionService {
         }
     }
 
+    @Transactional
     public BasicResponse<Transaction> create(Transaction transaction) {
         try {
             String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -185,10 +206,13 @@ public class TransactionService {
             Account source_account = accountRepo.findById(transaction.getAccount().getAccount_number()).orElseThrow();
             if (
                     source_account.getCustomerId() != user.getCustomerId()
-            ) return BasicResponse
-                    .<Transaction>builder()
-                    .error("the account does not belong to the user requesting the action")
-                    .build();
+            ) {
+                auditLogService.audit("the account does not belong to the user requesting the action", transaction, user);
+                return BasicResponse
+                        .<Transaction>builder()
+                        .error("the account does not belong to the user requesting the action")
+                        .build();
+            }
             List<TransactionDetail> details = transaction.getDetails();
             double total_debit = details.stream().mapToDouble(
                     detail -> Double.parseDouble(detail.getAmount())
@@ -199,10 +223,13 @@ public class TransactionService {
                             source_account
                                     .getAvailable_balance()
                     ) < total_debit
-            ) return BasicResponse
-                    .<Transaction>builder()
-                    .error("the account does not have the required balance to perform the transaction")
-                    .build();
+            ) {
+                auditLogService.audit("the account does not have the required balance to perform the transaction", transaction, user);
+                return BasicResponse
+                        .<Transaction>builder()
+                        .error("the account does not have the required balance to perform the transaction")
+                        .build();
+            }
 
             transaction.setOperated_at(LocalDateTime.now());
             transaction.setOperated_by(userEmail);
@@ -214,10 +241,11 @@ public class TransactionService {
             );
             transaction.setDetails(new ArrayList<>());
             long transaction_id = transactionRepo.save(transaction).getId();
+            auditLogService.audit("transaction saved", transaction, user);
             details = details.stream().peek(detail -> {
                 // if the transaction is not ACH query account information
                 System.out.println(transaction.getTransaction_type().getId());
-                if(transaction.getTransaction_type().getId() != 3){
+                if (transaction.getTransaction_type().getId() != 3) {
                     Account target_account = accountRepo.findById(detail.getTargetAccount()).orElseThrow();
                     Customer target_customer = customerRepo.findById(
                             target_account.getCustomerId()
@@ -228,6 +256,7 @@ public class TransactionService {
             }).toList();
 
             transactionDetailsRepo.saveAll(details);
+            auditLogService.audit("transaction details saved", transaction, user);
             // just to return the details in the json response
             transaction.setDetails(details);
             return BasicResponse
@@ -237,6 +266,7 @@ public class TransactionService {
                     .build();
 
         } catch (Exception e) {
+            auditLogService.audit("error creating transaction", transaction);
             return BasicResponse
                     .<Transaction>builder()
                     .error(e.getMessage())
@@ -252,19 +282,28 @@ public class TransactionService {
                 user.getAuthorities().stream().noneMatch(
                         authority -> Objects.equals(authority.getAuthority(), "authorizer")
                 )
-        ) return BasicResponse.<Transaction>builder()
-                .error("the user does not have the required role to perform the action")
-                .build();
+        ) {
+            auditLogService.audit("the user does not have the required role to perform the action", user, user);
+            return BasicResponse.<Transaction>builder()
+                    .error("the user does not have the required role to perform the action")
+                    .build();
+        }
         Transaction transaction = transactionRepo.findById(body.getTransaction_id()).orElseThrow();
-        if (transaction.getStatus().getId() == 2) return BasicResponse
-                .<Transaction>builder()
-                .error("Transaction already authorized")
-                .build();
+        if (transaction.getStatus().getId() == 2) {
+            auditLogService.audit("Transaction already authorized", transaction, user);
+            return BasicResponse
+                    .<Transaction>builder()
+                    .error("Transaction already authorized")
+                    .build();
+        }
         Account source_account = accountRepo.findById(transaction.getAccount().getAccount_number()).orElseThrow();
-        if (source_account.getCustomerId() != user.getCustomerId()) return BasicResponse
-                .<Transaction>builder()
-                .error("This transaction does not belongs you")
-                .build();
+        if (source_account.getCustomerId() != user.getCustomerId()) {
+            auditLogService.audit("transaction does not belongs to user requesting", transaction, user);
+            return BasicResponse
+                    .<Transaction>builder()
+                    .error("The transaction does not belong to the user requesting")
+                    .build();
+        }
 
         //-----perform credit to target accounts--------
         List<TransactionDetail> details = transaction.getDetails();
@@ -277,10 +316,13 @@ public class TransactionService {
                         source_account
                                 .getAvailable_balance()
                 ) < total_debit
-        ) return BasicResponse
-                .<Transaction>builder()
-                .error("the account does not have the required balance to perform the transaction")
-                .build();
+        ) {
+            auditLogService.audit("the account does not have the required balance to perform the transaction", transaction, user);
+            return BasicResponse
+                    .<Transaction>builder()
+                    .error("the account does not have the required balance to perform the transaction")
+                    .build();
+        }
 
 
         // -------perform debit to source account-------
@@ -291,8 +333,9 @@ public class TransactionService {
                 Double.toString(available_balance)
         );
         accountRepo.save(source_account);
+        auditLogService.audit("account updated", source_account, user);
         // --------------------------------------------
-        if(transaction.getTransaction_type().getId() != 3){
+        if (transaction.getTransaction_type().getId() != 3) {
             details.forEach(detail -> {
                 accountRepo.findById(detail.getTargetAccount()).map(target_account -> {
                     double credit = Double.parseDouble(
@@ -304,7 +347,9 @@ public class TransactionService {
                     target_account.setAvailable_balance(
                             Double.toString(target_available_balance)
                     );
-                    return accountRepo.save(target_account);
+                    accountRepo.save(target_account);
+                    auditLogService.audit("account updated", target_account, user);
+                    return target_account;
                 });
             });
         }
@@ -319,6 +364,7 @@ public class TransactionService {
         transaction.setAuthorized_at(LocalDateTime.now());
         transaction.setAuthorized_by(userEmail);
         transactionRepo.save(transaction);
+        auditLogService.audit("transaction authorized ", transaction, user);
         return BasicResponse
                 .<Transaction>builder()
                 .data(transaction)
