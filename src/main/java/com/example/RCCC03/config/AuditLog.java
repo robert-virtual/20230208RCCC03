@@ -1,9 +1,6 @@
 package com.example.RCCC03.config;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -19,6 +16,7 @@ public class AuditLog {
     private long id;
 
     private String action;
+    @Column(columnDefinition = "text")
     private String data;
     private LocalDateTime date;
     private long user_id;

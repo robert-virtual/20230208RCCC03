@@ -1,5 +1,6 @@
 package com.example.RCCC03.auth.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +30,7 @@ public class User implements UserDetails {
     private int role;
     private String otp;
     private LocalDateTime otp_expires_in;
+    @JsonIgnore
     private String password;
     private String email;
     private int failed_logins;

@@ -35,6 +35,7 @@ import java.util.Objects;
 public class AuthService {
 
     private final AuditLogService auditLogService;
+
     @Value("${app.otp.duration}")
     private long otp_duration;
     private final JavaMailSender javaMailSender;
@@ -79,9 +80,7 @@ public class AuthService {
     }
 
     public User info(String email) {
-        User user = userRepo.findByEmail(email).orElseThrow();
-        user.setPassword(null);
-        return user;
+        return userRepo.findByEmail(email).orElseThrow();
     }
 
     public String generateOtp() {
@@ -117,6 +116,7 @@ public class AuthService {
     }
 
     public BasicResponse<AuthResponse> login(LoginRequest loginRequest) {
+
         User user;
         try {
             user = userRepo.findByEmail(loginRequest.getEmail())
@@ -186,8 +186,6 @@ public class AuthService {
         var jwt = jwtService.generateToken(user);
         user.setLast_login(LocalDateTime.now());
         userRepo.save(user);
-        // to avoid returning the user his encrypted password (security reasons)
-        user.setPassword(null);
         auditLogService.audit(
                 "login attempt successful",
                 user,

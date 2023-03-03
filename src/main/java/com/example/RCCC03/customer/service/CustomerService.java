@@ -9,7 +9,6 @@ import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -23,23 +22,24 @@ public class CustomerService {
     private final CustomerRepository customerRepo;
     private final AccountRepository accountRepo;
     private final UserRepository userRepo;
-   public BasicResponse<List<Account>> getCustomerAccounts(){
+
+    public BasicResponse<List<Account>> getCustomerAccounts() {
 
         try {
             String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userRepo.findByEmail(userEmail).orElseThrow();
             List<Account> accounts = accountRepo.findAllByCustomerId(user.getCustomerId());
             return BasicResponse.<List<Account>>builder()
-                            .data_count(accounts.size())
-                            .data(accounts)
-                            .build()
-;
+                    .data_count(accounts.size())
+                    .data(accounts)
+                    .build()
+                    ;
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return BasicResponse.<List<Account>>builder()
-                            .error(e.getMessage())
-                            .build()
-;
+                    .error(e.getMessage())
+                    .build()
+                    ;
         }
     }
 
@@ -48,10 +48,10 @@ public class CustomerService {
         Customer customer = customerRepo.findById(customer_id).orElseThrow();
         List<Account> accounts = customer.getAccounts();
         return BasicResponse.<List<Account>>builder()
-                        .data_count(accounts.size())
-                        .data(accounts)
-                        .build()
-;
+                .data_count(accounts.size())
+                .data(accounts)
+                .build()
+                ;
     }
 
     public Customer update(Customer body) {
@@ -67,7 +67,7 @@ public class CustomerService {
             if (body.getAddress_2() != null) customer_.setAddress_2(body.getAddress_2());
             return customerRepo.save(customer_);
         }).orElseThrow();
-       auditLogService.audit("update customer",customer,user);
+        auditLogService.audit("update customer", customer, user);
         return customer;
     }
 
@@ -82,12 +82,12 @@ public class CustomerService {
 
         customer.setStatus("inactive");
         customerRepo.save(customer);
-        auditLogService.audit("disable customer",customer,user);
+        auditLogService.audit("disable customer", customer, user);
         return BasicResponse
-                        .builder()
-                        .message("user disabled successfully")
-                        .build()
-;
+                .builder()
+                .message("user disabled successfully")
+                .build()
+                ;
     }
 
 
@@ -116,17 +116,16 @@ public class CustomerService {
             company.addEmployee(employee);
             return customerRepo.save(company);
         });
-        auditLogService.audit("add employee to company",employee,user);
+        auditLogService.audit("add employee to company", employee, user);
         return BasicResponse
-                        .<String>builder()
-                        .message(employee.getName() + " successfully added to the company")
-                        .build()
-;
+                .<String>builder()
+                .message(employee.getName() + " successfully added to the company")
+                .build();
     }
 
     public Customer create(Customer body) {
-       Customer customer = customerRepo.save(body);
-        auditLogService.audit("create customer",customer);
+        Customer customer = customerRepo.save(body);
+        auditLogService.audit("create customer", customer);
         return customer;
     }
 
