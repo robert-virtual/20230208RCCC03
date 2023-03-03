@@ -57,8 +57,9 @@ public class ApplicationConfig {
 
     @EventListener
     public void seed(ContextRefreshedEvent event) {
-        seedUsers();
         seedRoles();
+        seedCustomers();
+        seedUsers();
         seedTransactionType();
         seedTransactionStatus();
         seedAccountType();
@@ -166,10 +167,10 @@ public class ApplicationConfig {
 
     }
 
-    private void seedUsers() {
-        Optional<User> user = userRepo.findByEmail("admin@admin.com");
-        if (user.isEmpty()) {
-            Customer customer = customerRepo.save(
+    private void seedCustomers(){
+        Optional<Customer> customer = customerRepo.findByEmail("admin@admin.com");
+        if (customer.isEmpty()){
+            customerRepo.save(
                     Customer
                             .builder()
                             .name("Admin")
@@ -178,6 +179,11 @@ public class ApplicationConfig {
                             .dni("0703199001234")
                             .build()
             );
+        }
+    }
+    private void seedUsers() {
+        Optional<User> user = userRepo.findByEmail("admin@admin.com");
+        if (user.isEmpty()) {
             userRepo.save(
                     User
                             .builder()
@@ -185,7 +191,7 @@ public class ApplicationConfig {
                             .password(passwordEncoder().encode(adminPassword))
                             .role(3)
                             .status(true)
-                            .customerId(customer.getId())
+                            .customerId(1)
                             .created_at(LocalDateTime.now())
                             .build()
             );
