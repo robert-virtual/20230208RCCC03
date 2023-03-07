@@ -6,6 +6,7 @@ import com.example.RCCC03.auth.model.RegisterRequest;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.service.AuthService;
 import com.example.RCCC03.config.BasicResponse;
+import jakarta.persistence.Basic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,7 +37,7 @@ public class AuthController {
         return authService.register(body);
     }
     @GetMapping("/info")
-    public ResponseEntity<User> info() {
+    public ResponseEntity<BasicResponse<User>> info() {
         var name = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(authService.info(name));
     }

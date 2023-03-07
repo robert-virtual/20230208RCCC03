@@ -11,7 +11,7 @@
 	<groupId>com.example</groupId>
 	<artifactId>20230208RCCC03</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>20230208RCCC03</name>
 	<description>api evaluacion tecnica infatlan</description>
 	<properties>

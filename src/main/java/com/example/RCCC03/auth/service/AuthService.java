@@ -81,8 +81,8 @@ public class AuthService {
                 .build();
     }
 
-    public User info(String email) {
-        return userRepo.findByEmail(email).orElseThrow();
+    public BasicResponse<User> info(String email) {
+        return BasicResponse.<User>builder().data(userRepo.findByEmail(email).orElseThrow()).build();
     }
 
     public String generateOtp() {
