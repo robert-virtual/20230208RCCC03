@@ -4,7 +4,7 @@ import com.example.RCCC03.account.model.Account;
 import com.example.RCCC03.account.repository.AccountRepository;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
-import com.example.RCCC03.config.AuditLogService;
+import com.example.RCCC03.audit.AuditLogService;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;

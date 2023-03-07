@@ -3,7 +3,7 @@ package com.example.RCCC03.provider.service;
 
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
-import com.example.RCCC03.config.AuditLogService;
+import com.example.RCCC03.audit.AuditLogService;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.provider.model.Provider;
 import com.example.RCCC03.provider.model.ServiceProvider;

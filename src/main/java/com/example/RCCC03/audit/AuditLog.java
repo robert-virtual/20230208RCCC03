@@ -1,4 +1,4 @@
-package com.example.RCCC03.config;
+package com.example.RCCC03.audit;
 
 import jakarta.persistence.*;
 import lombok.*;

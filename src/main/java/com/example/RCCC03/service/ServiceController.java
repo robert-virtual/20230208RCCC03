@@ -1,6 +1,6 @@
 package com.example.RCCC03.service;
 
-import com.example.RCCC03.config.AuditLogService;
+import com.example.RCCC03.audit.AuditLogService;
 import com.example.RCCC03.service.model.Service;
 import com.example.RCCC03.service.repository.ServiceRepository;
 import lombok.RequiredArgsConstructor;

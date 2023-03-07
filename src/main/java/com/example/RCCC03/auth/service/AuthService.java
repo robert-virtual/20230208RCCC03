@@ -3,7 +3,7 @@ package com.example.RCCC03.auth.service;
 import com.example.RCCC03.auth.model.*;
 import com.example.RCCC03.auth.repository.RoleRepository;
 import com.example.RCCC03.auth.repository.UserRepository;
-import com.example.RCCC03.config.AuditLogService;
+import com.example.RCCC03.audit.AuditLogService;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
@@ -36,6 +36,8 @@ public class AuthService {
 
     private final AuditLogService auditLogService;
 
+    @Value("${spring.mail.username}")
+    private String mailUser;
     @Value("${app.otp.duration}")
     private long otp_duration;
     private final JavaMailSender javaMailSender;
@@ -54,7 +56,7 @@ public class AuthService {
         String otp = generateOtp();
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
-        helper.setFrom("robertocastillodev@gmail.com");
+        helper.setFrom(mailUser);
         helper.setTo(registerRequest.getEmail());
         helper.setSubject("Evaluacion tecnica - Codigo de desbloqueo");
         helper.setText(
@@ -257,7 +259,7 @@ public class AuthService {
         // send email with user credentials
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
-        helper.setFrom("robertocastillodev@gmail.com");
+        helper.setFrom(mailUser);
         helper.setTo(registerRequest.getEmail());
         helper.setSubject("Tu usuario y contraseña para la banca en linea");
         helper.setText(
