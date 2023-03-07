@@ -40,7 +40,7 @@ public class ProviderService {
                 .build();
     }
 
-    public Provider update(Provider body, long provider_id) throws Exception {
+    public BasicResponse<Provider> update(Provider body, long provider_id) throws Exception {
         // verify that the provider belongs to the user requesting the action
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepo.findByEmail(userEmail).orElseThrow();
@@ -51,10 +51,10 @@ public class ProviderService {
         provider.setName(body.getName());
         providerRepo.save(provider);
         auditLogService.audit("update provider", provider, user);
-        return provider;
+        return BasicResponse.<Provider>builder().data(provider).build();
     }
 
-    public Provider createProvider(Provider provider) throws Exception {
+    public BasicResponse<Provider> createProvider(Provider provider) throws Exception {
         // verify that the user has permission to create providers
         var authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
         if (authorities.stream().noneMatch(authority -> authority.getAuthority().matches("accounts_creator"))) {
@@ -65,7 +65,7 @@ public class ProviderService {
         provider.setCustomerId(user.getCustomerId());
         auditLogService.audit("create provider", provider, user);
         providerRepo.save(provider);
-        return provider;
+        return BasicResponse.<Provider>builder().data(provider).build();
 
     }
 

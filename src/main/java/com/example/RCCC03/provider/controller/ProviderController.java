@@ -5,6 +5,7 @@ import com.example.RCCC03.provider.model.Provider;
 import com.example.RCCC03.service.model.Service;
 import com.example.RCCC03.provider.model.ServiceProvider;
 import com.example.RCCC03.provider.service.ProviderService;
+import jakarta.persistence.Basic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +44,7 @@ public class ProviderController {
 
     // creates a provider
     @PostMapping ("/create")
-    public ResponseEntity<Provider> create(
+    public ResponseEntity<BasicResponse<Provider>> create(
             @RequestBody Provider body
     ) throws Exception {
         return ResponseEntity.ok(
@@ -61,7 +62,7 @@ public class ProviderController {
         );
     }
     @PutMapping ("/{provider_id}/update")
-    public ResponseEntity<Provider> create(
+    public ResponseEntity<BasicResponse<Provider>> create(
             @RequestBody Provider body,
             @PathVariable long provider_id
     ) throws Exception {
