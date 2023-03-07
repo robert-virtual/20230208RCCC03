@@ -3,6 +3,7 @@ package com.example.RCCC03.account.service;
 import com.example.RCCC03.account.model.Account;
 import com.example.RCCC03.account.repository.AccountRepository;
 import com.example.RCCC03.audit.AuditLogService;
+import com.example.RCCC03.config.BasicResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,7 @@ public class AccountService {
     private final AuditLogService auditLogService;
     private final AccountRepository accountRepository;
 
-    public Account create(Account body) {
+    public BasicResponse<Account> create(Account body) {
         Account account = accountRepository.save(
                 Account
                         .builder()
@@ -28,6 +29,6 @@ public class AccountService {
                         .build()
         );
         auditLogService.audit("create account",account);
-        return account;
+        return BasicResponse.<Account>builder().data(account).build();
     }
 }

@@ -8,6 +8,7 @@ import com.example.RCCC03.audit.AuditLogService;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
+import jakarta.persistence.Basic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -54,7 +55,7 @@ public class CustomerService {
                 ;
     }
 
-    public Customer update(Customer body) {
+    public BasicResponse<Customer> update(Customer body) {
         User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
         long customer_id = user.getCustomerId();
 
@@ -68,7 +69,7 @@ public class CustomerService {
             return customerRepo.save(customer_);
         }).orElseThrow();
         auditLogService.audit("update customer", customer, user);
-        return customer;
+        return BasicResponse.<Customer>builder().data(customer).build();
     }
 
     public BasicResponse<Object> disable() {
@@ -123,14 +124,14 @@ public class CustomerService {
                 .build();
     }
 
-    public Customer create(Customer body) {
+    public BasicResponse<Customer> create(Customer body) {
         Customer customer = customerRepo.save(body);
         auditLogService.audit("create customer", customer);
-        return customer;
+        return BasicResponse.<Customer>builder().data(customer).build();
     }
 
-    public Customer getOne(long id) {
-        return customerRepo.findById(id).orElseThrow();
+    public BasicResponse<Customer> getOne(long id) {
+        return BasicResponse.<Customer>builder().data(customerRepo.findById(id).orElseThrow()).build();
     }
 
     public BasicResponse<List<Customer>> getAll(boolean company) {
@@ -141,9 +142,9 @@ public class CustomerService {
                 .build();
     }
 
-    public Customer me() {
+    public BasicResponse<Customer> me() {
         User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
-        return customerRepo.findById(user.getCustomerId()).orElseThrow();
+        return BasicResponse.<Customer>builder().data(customerRepo.findById(user.getCustomerId()).orElseThrow()).build();
     }
 
 

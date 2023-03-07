@@ -77,7 +77,7 @@ public class AuthService {
        auditLogService.audit("otp requested",user,user);
         return BasicResponse
                 .<String>builder()
-                .message("An OTP was send to the user email, send the OTP and the new password to PUT - /auth/password")
+                .data("An OTP was send to the user email, send the OTP and the new password to PUT - /auth/password")
                 .build();
     }
 

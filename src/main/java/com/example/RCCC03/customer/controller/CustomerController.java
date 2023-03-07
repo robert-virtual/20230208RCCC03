@@ -4,6 +4,7 @@ import com.example.RCCC03.account.model.Account;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.service.CustomerService;
+import jakarta.persistence.Basic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping("/me")
-    public Customer me() {
+    public BasicResponse<Customer> me() {
         return customerService.me();
     }
 
@@ -28,7 +29,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getOne(
+    public ResponseEntity<BasicResponse<Customer>> getOne(
             @PathVariable long id
     ) {
         return ResponseEntity.ok(customerService.getOne(id));
@@ -48,12 +49,12 @@ public class CustomerController {
     }
 
     @PostMapping("/create")
-    ResponseEntity<Customer> create(@RequestBody Customer body) {
+    ResponseEntity<BasicResponse<Customer>> create(@RequestBody Customer body) {
         return ResponseEntity.ok(customerService.create(body));
     }
 
     @PutMapping("/update")
-    ResponseEntity<Customer> update(
+    ResponseEntity<BasicResponse<Customer>> update(
             @RequestBody Customer body
     ) {
         return ResponseEntity.ok(customerService.update(body));
