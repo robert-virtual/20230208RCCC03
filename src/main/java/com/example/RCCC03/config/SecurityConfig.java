@@ -22,6 +22,8 @@ public class SecurityConfig {
        return httpSecurity
                .csrf()
                .disable()
+               .cors()
+               .and()
                .authorizeHttpRequests()
                .requestMatchers(
                        "/auth/login",
