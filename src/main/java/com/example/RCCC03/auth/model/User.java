@@ -27,12 +27,22 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private int role;
+    @ManyToMany
+    @JoinTable(
+            name = "user_role",
+           joinColumns = @JoinColumn(name = "user_id",referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id",referencedColumnName = "id")
+    )
+    private List<Role> roles = new ArrayList<>();
+    public void addRole(Role role){
+        roles.add(role);
+    }
     private String otp;
     private LocalDateTime otp_expires_at;
     @JsonIgnore
     private String password;
     private String email;
+    @JsonIgnore
     private int failed_logins;
 
     @Column(name = "customer_id")
@@ -40,20 +50,16 @@ public class User implements UserDetails {
 
 
     private boolean status;
+    @JsonIgnore
     private LocalDateTime created_at;
+    @JsonIgnore
     private LocalDateTime updated_at;
     private LocalDateTime last_login;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        List<String> roles = new ArrayList<>();
-        switch (role) {
-            case 1 -> roles.add("operator");
-            case 2 -> roles.add("authorizer");
-            case 3 -> roles.add("accounts_creator");
-        }
-        return roles.stream().map(SimpleGrantedAuthority::new).toList();
+        return roles.stream().map(role->new SimpleGrantedAuthority(role.getName())).toList();
     }
 
     @Override

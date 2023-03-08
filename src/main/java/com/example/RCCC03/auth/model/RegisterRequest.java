@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 
 @Data
 @Builder
@@ -13,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class RegisterRequest {
 
     private String email;
-    private int role;
+    private List<Role> roles;
     private long customer_id;
 
 }

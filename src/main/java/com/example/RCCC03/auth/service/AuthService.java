@@ -204,7 +204,7 @@ public class AuthService {
     }
 
     @Transactional
-    public ResponseEntity<BasicResponse<String>> register(
+    public BasicResponse<User> register(
             RegisterRequest registerRequest
     ) throws Exception {
         // verify that the user has permission to create accounts
@@ -220,7 +220,7 @@ public class AuthService {
                         .noneMatch(
                                 authority -> authority
                                         .getAuthority()
-                                        .matches("accounts_creator")
+                                        .matches("user_creator")
                         )
         ) {
 
@@ -229,18 +229,15 @@ public class AuthService {
                     loggedUser,
                     loggedUser
             );
-            return new ResponseEntity<>(
-                    BasicResponse.<String>builder()
+            return BasicResponse.<User>builder()
                             .error("User does not have permission to create users")
-                            .build(),
-                    HttpStatus.UNAUTHORIZED
-            );
+                            .build();
         }
         String strongPassword = generateStrongPassword();
         var user = User.builder()
                 .customerId(registerRequest.getCustomer_id())
                 .email(registerRequest.getEmail())
-                .role(registerRequest.getRole())
+                .roles(registerRequest.getRoles())
                 .created_at(LocalDateTime.now())
                 .failed_logins(0)
                 .status(true)
@@ -276,12 +273,9 @@ public class AuthService {
         javaMailSender.send(message);
         // send email with user credentials
 
-        return new ResponseEntity<>(
-                BasicResponse.<String>builder()
-                        .data("user created successfully their credentials have been sent to the email address provided")
-                        .build(),
-                HttpStatus.CREATED
-        );
+        return BasicResponse.<User>builder()
+                        .data(user)
+                        .build();
 
     }
 

@@ -33,8 +33,8 @@ public class AuthController {
         return authService.forgotPassword(body);
     }
     @PostMapping("/register")
-    public ResponseEntity<BasicResponse<String>> register(@RequestBody RegisterRequest body) throws Exception {
-        return authService.register(body);
+    public ResponseEntity<BasicResponse<User>> register(@RequestBody RegisterRequest body) throws Exception {
+        return ResponseEntity.ok(authService.register(body));
     }
     @GetMapping("/info")
     public ResponseEntity<BasicResponse<User>> info() {

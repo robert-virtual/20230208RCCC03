@@ -2,13 +2,16 @@ package com.example.RCCC03.customer.service;
 
 import com.example.RCCC03.account.model.Account;
 import com.example.RCCC03.account.repository.AccountRepository;
+import com.example.RCCC03.auth.model.RegisterRequest;
+import com.example.RCCC03.auth.model.Role;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.UserRepository;
 import com.example.RCCC03.audit.AuditLogService;
+import com.example.RCCC03.auth.service.AuthService;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.repository.CustomerRepository;
-import jakarta.persistence.Basic;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CustomerService {
     private final AuditLogService auditLogService;
+    private final AuthService authService;
     private final CustomerRepository customerRepo;
     private final AccountRepository accountRepo;
     private final UserRepository userRepo;
@@ -52,8 +56,7 @@ public class CustomerService {
         return BasicResponse.<List<Account>>builder()
                 .data_count(accounts.size())
                 .data(accounts)
-                .build()
-                ;
+                .build();
     }
 
     public BasicResponse<Customer> update(Customer body) {
@@ -126,9 +129,23 @@ public class CustomerService {
                 .build();
     }
 
+    @Transactional
     public BasicResponse<Customer> create(Customer body) {
         Customer customer = customerRepo.save(body);
         auditLogService.audit("create customer", customer);
+        try {
+            User user = authService.register(
+                    RegisterRequest
+                            .builder()
+                            .customer_id(customer.getId())
+                            .email(customer.getEmail())
+                            .roles(List.of(Role.builder().id(4).build()))//user_creator
+                            .build()
+            ).getData();
+            customer.setUsers(List.of(user));
+        } catch (Exception e) {
+            return BasicResponse.<Customer>builder().error("could not create user for the given customer").build();
+        }
         return BasicResponse.<Customer>builder().data(customer).build();
     }
 

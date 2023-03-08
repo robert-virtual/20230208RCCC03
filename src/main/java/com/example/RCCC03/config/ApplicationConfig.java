@@ -58,7 +58,6 @@ public class ApplicationConfig {
     @EventListener
     public void seed(ContextRefreshedEvent event) {
         seedRoles();
-        seedCustomers();
         seedUsers();
         seedTransactionType();
         seedTransactionStatus();
@@ -152,7 +151,7 @@ public class ApplicationConfig {
 
     private void seedRoles() {
         List<Role> roles = roleRepo.findAll();
-        List<String> seed_roles = List.of("authorizer", "operator", "account_creator");
+        List<String> seed_roles = List.of("authorizer", "operator", "account_creator","user_creator");
         seed_roles.forEach(s -> {
             if (
                     roles.stream().noneMatch(role -> Objects.equals(role.getName(), s))
@@ -167,10 +166,8 @@ public class ApplicationConfig {
 
     }
 
-    private void seedCustomers(){
-        Optional<Customer> customer = customerRepo.findByEmail("admin@admin.com");
-        if (customer.isEmpty()){
-            customerRepo.save(
+    private Customer createCustomer(){
+            return customerRepo.save(
                     Customer
                             .builder()
                             .name("Admin")
@@ -179,19 +176,25 @@ public class ApplicationConfig {
                             .dni("0703199001234")
                             .build()
             );
-        }
     }
     private void seedUsers() {
         Optional<User> user = userRepo.findByEmail("admin@admin.com");
         if (user.isEmpty()) {
+            Optional<Customer> customer = customerRepo.findByEmail("admin@admin.com");
+            long customer_id = customer.map(Customer::getId).orElseGet(() -> createCustomer().getId());
             userRepo.save(
                     User
                             .builder()
                             .email("admin@admin.com")
                             .password(passwordEncoder().encode(adminPassword))
-                            .role(3)
+                            .roles(
+                                    List.of(
+                                            Role.builder().id(3).build(),// account_creator
+                                            Role.builder().id(4).build() // user_creator
+                                    )
+                            )
                             .status(true)
-                            .customerId(1)
+                            .customerId(customer_id)
                             .created_at(LocalDateTime.now())
                             .build()
             );

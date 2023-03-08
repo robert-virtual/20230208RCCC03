@@ -16,14 +16,16 @@ public class Account {
     public Account(){
         this.available_balance = "0";
         this.held_balance = "0";
-        this.status = 1 ;
+        this.accountStatus = AccountStatus.builder().id(1).build(); ;
         this.created_at = LocalDateTime.now();
     }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long account_number;
 
-    private int account_type;
+    @ManyToOne
+    @JoinColumn(name = "account_type",referencedColumnName = "id")
+    private AccountType accountType;
     private String available_balance;
     private String held_balance;
 
@@ -32,6 +34,8 @@ public class Account {
     @JsonProperty("customer_id")
     private long customerId;
     private LocalDateTime created_at;
-    private int status;
+    @ManyToOne
+    @JoinColumn(name = "status",referencedColumnName = "id")
+    private AccountStatus accountStatus;
 
 }
