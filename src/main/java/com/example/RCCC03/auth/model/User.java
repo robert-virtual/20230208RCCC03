@@ -29,7 +29,7 @@ public class User implements UserDetails {
     private long id;
     private int role;
     private String otp;
-    private LocalDateTime otp_expires_in;
+    private LocalDateTime otp_expires_at;
     @JsonIgnore
     private String password;
     private String email;

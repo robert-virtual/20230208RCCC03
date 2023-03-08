@@ -70,19 +70,23 @@ public class ProviderService {
     }
 
 
-    public BasicResponse<String> addServiceToProvider(ServiceProvider serviceProvider) throws Exception {
+    public BasicResponse<String> addServicesToProvider(ServiceProvider serviceProvider) {
         User user = userRepo.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
         Provider provider = providerRepo.findById(serviceProvider.getProvider_id()).orElseThrow();
         if (provider.getCustomerId() != user.getCustomerId()) {
-            throw new Exception("the given provider id does not belong to the user");
+            return BasicResponse
+                    .<String>builder()
+                    .data("the given provider id does not belong to the user")
+                    .build();
         }
-        Service service = serviceRepo.findById(serviceProvider.getService_id()).orElseThrow();
-        provider.addService(service);
+        serviceProvider.getServices().forEach(id->{
+            provider.addService(Service.builder().id(id).build());
+        });
         providerRepo.save(provider);
-        auditLogService.audit("add service to provider", provider, user);
+        auditLogService.audit("add services to provider", provider, user);
         return BasicResponse
                 .<String>builder()
-                .message("Service added successfully")
+                .data("Service added successfully")
                 .build();
 
     }

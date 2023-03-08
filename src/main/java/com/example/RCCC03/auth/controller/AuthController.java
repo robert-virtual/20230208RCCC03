@@ -23,7 +23,7 @@ public class AuthController {
        return ResponseEntity.ok(authService.login(body));
     }
     @PutMapping("/password")
-    public ResponseEntity<BasicResponse<AuthResponse>> updatePassword(
+    public ResponseEntity<BasicResponse<String>> updatePassword(
             @RequestBody User body
     ) {
         return authService.updatePassword(body);
@@ -33,7 +33,7 @@ public class AuthController {
         return authService.forgotPassword(body);
     }
     @PostMapping("/register")
-    public ResponseEntity<BasicResponse<AuthResponse>> register(@RequestBody RegisterRequest body) throws Exception {
+    public ResponseEntity<BasicResponse<String>> register(@RequestBody RegisterRequest body) throws Exception {
         return authService.register(body);
     }
     @GetMapping("/info")

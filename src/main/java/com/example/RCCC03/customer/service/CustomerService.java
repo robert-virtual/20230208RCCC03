@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +67,7 @@ public class CustomerService {
             if (body.getPhone() != null) customer_.setPhone(body.getPhone());
             if (body.getAddress_1() != null) customer_.setAddress_1(body.getAddress_1());
             if (body.getAddress_2() != null) customer_.setAddress_2(body.getAddress_2());
+            customer_.setUpdated_at(LocalDateTime.now());
             return customerRepo.save(customer_);
         }).orElseThrow();
         auditLogService.audit("update customer", customer, user);
@@ -86,7 +88,7 @@ public class CustomerService {
         auditLogService.audit("disable customer", customer, user);
         return BasicResponse
                 .builder()
-                .message("user disabled successfully")
+                .data("user disabled successfully")
                 .build()
                 ;
     }
@@ -120,7 +122,7 @@ public class CustomerService {
         auditLogService.audit("add employee to company", employee, user);
         return BasicResponse
                 .<String>builder()
-                .message(employee.getName() + " successfully added to the company")
+                .data(employee.getName() + " successfully added to the company")
                 .build();
     }
 

@@ -72,7 +72,7 @@ public class AuthService {
         );
         javaMailSender.send(message);
         user.setOtp(otp);
-        user.setOtp_expires_in(LocalDateTime.now().plus(otp_duration, ChronoUnit.MINUTES));
+        user.setOtp_expires_at(LocalDateTime.now().plus(otp_duration, ChronoUnit.MINUTES));
         userRepo.save(user);
        auditLogService.audit("otp requested",user,user);
         return BasicResponse
@@ -204,7 +204,7 @@ public class AuthService {
     }
 
     @Transactional
-    public ResponseEntity<BasicResponse<AuthResponse>> register(
+    public ResponseEntity<BasicResponse<String>> register(
             RegisterRequest registerRequest
     ) throws Exception {
         // verify that the user has permission to create accounts
@@ -230,7 +230,7 @@ public class AuthService {
                     loggedUser
             );
             return new ResponseEntity<>(
-                    BasicResponse.<AuthResponse>builder()
+                    BasicResponse.<String>builder()
                             .error("User does not have permission to create users")
                             .build(),
                     HttpStatus.UNAUTHORIZED
@@ -277,8 +277,8 @@ public class AuthService {
         // send email with user credentials
 
         return new ResponseEntity<>(
-                BasicResponse.<AuthResponse>builder()
-                        .message("user created successfully their credentials have been sent to the email address provided")
+                BasicResponse.<String>builder()
+                        .data("user created successfully their credentials have been sent to the email address provided")
                         .build(),
                 HttpStatus.CREATED
         );
@@ -289,15 +289,15 @@ public class AuthService {
         return roleRepo.findById(id).orElseThrow();
     }
 
-    public ResponseEntity<BasicResponse<AuthResponse>> updatePassword(User body) {
+    public ResponseEntity<BasicResponse<String>> updatePassword(User body) {
         User user = userRepo.findByEmail(body.getEmail()).orElseThrow();
         if (
-                user.getOtp_expires_in().isBefore(LocalDateTime.now())
+                user.getOtp_expires_at().isBefore(LocalDateTime.now())
         ) {
             auditLogService.audit("update password failed due to expired otp", user, user);
             return new ResponseEntity<>(
                     BasicResponse
-                            .<AuthResponse>builder()
+                            .<String>builder()
                             .error("Otp expired")
                             .build()
                     , HttpStatus.UNAUTHORIZED);
@@ -308,19 +308,22 @@ public class AuthService {
             auditLogService.audit("update password failed due to invalid otp", user, user);
             return new ResponseEntity<>(
                     BasicResponse
-                            .<AuthResponse>builder()
+                            .<String>builder()
                             .error("invalid otp")
                             .build()
                     , HttpStatus.UNAUTHORIZED);
         }
+        // prevent further usage of this otp
+        user.setOtp_expires_at(LocalDateTime.now());
+        user.setUpdated_at(LocalDateTime.now());
         user.setPassword(passwordEncoder.encode(body.getPassword()));
         userRepo.save(user);
 
         auditLogService.audit("update password successful", user, user);
         return new ResponseEntity<>(
                 BasicResponse
-                        .<AuthResponse>builder()
-                        .message("password updated successfully")
+                        .<String>builder()
+                        .data("password updated successfully")
                         .build()
                 , HttpStatus.UNAUTHORIZED);
     }

@@ -38,11 +38,12 @@ public class Customer {
     private String dni;
 
     @Column(nullable = true,name = "is_company")
-    private boolean isCompany = false;
+    private boolean isCompany;
     private String phone;
     private String address_1;
     private String address_2;
     private LocalDateTime created_at;
+    private LocalDateTime updated_at;
     @Column(nullable = true)
     private String status;
 

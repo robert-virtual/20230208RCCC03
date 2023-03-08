@@ -54,11 +54,11 @@ public class ProviderController {
     // add a service to a provider
     // it verifies that the provider belongs to the user requesting the action
     @PostMapping ("/add/service")
-    public ResponseEntity<BasicResponse> createService(
+    public ResponseEntity<BasicResponse<String>> addServicesToProvider(
             @RequestBody ServiceProvider body
-    ) throws Exception {
+    ) {
         return ResponseEntity.ok(
-                providerService.addServiceToProvider(body)
+                providerService.addServicesToProvider(body)
         );
     }
     @PutMapping ("/{provider_id}/update")

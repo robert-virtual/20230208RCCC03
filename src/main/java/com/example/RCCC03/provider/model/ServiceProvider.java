@@ -5,11 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Data
 public class ServiceProvider {
     private long provider_id;
-    private long service_id;
+    private List<Long> services;
 }
