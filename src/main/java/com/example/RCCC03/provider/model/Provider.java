@@ -36,4 +36,5 @@ public class Provider {
     public void addService(Service service){
        services.add(service);
     }
+    private String status;
 }

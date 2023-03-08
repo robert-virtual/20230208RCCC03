@@ -67,7 +67,7 @@ public class TransactionService {
                         .build()
         );
         transaction.setAuthorized_at(LocalDateTime.now());
-        transaction.setAuthorized_by(userEmail);
+        transaction.setAuthorizer(user);
         transactionRepo.save(transaction);
         auditLogService.audit("transaction authorized", transaction, user);
         double total_credit = details.stream().mapToDouble(
@@ -132,7 +132,7 @@ public class TransactionService {
             }
 
             transaction.setOperated_at(LocalDateTime.now());
-            transaction.setOperated_by(userEmail);
+            transaction.setOperator(user);
             transaction.setStatus(
                     TransactionStatus
                             .builder()
@@ -232,7 +232,7 @@ public class TransactionService {
             }
 
             transaction.setOperated_at(LocalDateTime.now());
-            transaction.setOperated_by(userEmail);
+            transaction.setOperator(user);
             transaction.setStatus(
                     TransactionStatus
                             .builder()
@@ -362,7 +362,7 @@ public class TransactionService {
                         .build()
         );
         transaction.setAuthorized_at(LocalDateTime.now());
-        transaction.setAuthorized_by(userEmail);
+        transaction.setAuthorizer(user);
         transactionRepo.save(transaction);
         auditLogService.audit("transaction authorized ", transaction, user);
         return BasicResponse

@@ -20,7 +20,7 @@ import java.util.List;
 public class Customer {
 
     public Customer(){
-       company = false;
+       isCompany = false;
         status = "active";
     }
     @Id
@@ -37,8 +37,8 @@ public class Customer {
     @Column(unique = true,nullable = false)
     private String dni;
 
-    @Column(nullable = true)
-    private boolean company = false;
+    @Column(nullable = true,name = "is_company")
+    private boolean isCompany = false;
     private String phone;
     private String address_1;
     private String address_2;

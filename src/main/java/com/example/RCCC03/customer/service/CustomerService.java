@@ -135,7 +135,7 @@ public class CustomerService {
     }
 
     public BasicResponse<List<Customer>> getAll(boolean company) {
-        List<Customer> customers = customerRepo.findAllByCompany(company);
+        List<Customer> customers = customerRepo.findAllByIsCompany(company);
         return BasicResponse.<List<Customer>>builder()
                 .data(customers)
                 .data_count(customers.size())

@@ -1,6 +1,7 @@
 package com.example.RCCC03.transaction.model;
 
 import com.example.RCCC03.account.model.Account;
+import com.example.RCCC03.auth.model.User;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -31,8 +32,14 @@ public class Transaction {
     private TransactionStatus status;
     //private int status;
     private String notes;
-    private String authorized_by;
-    private String operated_by;
+    @ManyToOne
+    @JoinColumn(name = "authorized_by",referencedColumnName = "id")
+    private User authorizer;
+//    private String authorized_by;
+    @ManyToOne
+    @JoinColumn(name = "operated_by",referencedColumnName = "id")
+    private User operator;
+    //private String operated_by;
 
     @OneToMany
     @JoinColumn(name = "transaction_id",referencedColumnName = "id")
