@@ -1,6 +1,16 @@
-lbrt
-swift
-batch
+#Evaluacion tecnica
+
+## Diagramas de flujo
+
+![diagrama_de_flujo_login_y_creacion_de_cliente](./images/diagrama_de_flujo_login_y_creacion_de_cliente.png)
+
+
+
+
+### Palabras clave
+- lbrt
+- swift
+- batch
 usuarios 
 - se les solicitara telefono
 
