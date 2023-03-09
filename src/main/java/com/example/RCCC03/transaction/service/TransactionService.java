@@ -372,6 +372,24 @@ public class TransactionService {
                 .build();
     }
 
+
+    public BasicResponse<List<Transaction>> allByUser() {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepo.findByEmail(userEmail).orElseThrow();
+        List<Transaction> transactions = new ArrayList<>();
+        if (user.getRoles().stream().anyMatch(role -> Objects.equals(role.getName(), "authorizer"))) {
+            transactions.addAll(transactionRepo.findAllByAuthorizer(user));
+        }
+        if (user.getRoles().stream().anyMatch(role -> Objects.equals(role.getName(), "operator"))) {
+            transactions.addAll(transactionRepo.findAllByOperator(user));
+        }
+        return BasicResponse.<List<Transaction>>builder()
+                .data(transactions)
+                .data_count(transactions.size())
+                .data_type("Transaction[]")
+                .build();
+    }
+
     public BasicResponse<List<Transaction>> all(Account account) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepo.findByEmail(userEmail).orElseThrow();

@@ -9,7 +9,9 @@ import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.auth.repository.RoleRepository;
 import com.example.RCCC03.auth.repository.UserRepository;
 import com.example.RCCC03.customer.model.Customer;
+import com.example.RCCC03.customer.model.ProviderType;
 import com.example.RCCC03.customer.repository.CustomerRepository;
+import com.example.RCCC03.customer.repository.ProviderTypeRepository;
 import com.example.RCCC03.transaction.model.TransactionStatus;
 import com.example.RCCC03.transaction.model.TransactionType;
 import com.example.RCCC03.transaction.repository.TransactionStatusRepository;
@@ -42,6 +44,7 @@ import java.util.Properties;
 public class ApplicationConfig {
     private final UserRepository userRepo;
     private final CustomerRepository customerRepo;
+    private final ProviderTypeRepository providerTypeRepo;
     private final TransactionTypeRepository transactionTypeRepo;
     private final RoleRepository roleRepo;
     @Value("${app.admin.password}")
@@ -59,6 +62,7 @@ public class ApplicationConfig {
     public void seed(ContextRefreshedEvent event) {
         seedRoles();
         seedUsers();
+        seedProviderTypes();
         seedTransactionType();
         seedTransactionStatus();
         seedAccountType();
@@ -126,6 +130,25 @@ public class ApplicationConfig {
 
     }
 
+    private void seedProviderTypes() {
+        List<ProviderType> providerTypes = providerTypeRepo.findAll();
+        List<ProviderType> seed_provider_types = List.of(
+                new ProviderType(0, "Employee"),
+                new ProviderType(0, "Provider")
+        );
+        seed_provider_types.forEach(s -> {
+            if (
+                    providerTypes.stream().noneMatch(
+                            transactionType -> Objects.equals(
+                                    transactionType.getName(), s.getName()
+                            )
+                    )
+            ) {
+                providerTypeRepo.save(s);
+            }
+        });
+
+    }
     private void seedTransactionType() {
         List<TransactionType> transactionTypes = transactionTypeRepo.findAll();
         List<TransactionType> seed_transaction_types = List.of(
@@ -151,7 +174,7 @@ public class ApplicationConfig {
 
     private void seedRoles() {
         List<Role> roles = roleRepo.findAll();
-        List<String> seed_roles = List.of("authorizer", "operator", "account_creator","user_creator");
+        List<String> seed_roles = List.of("authorizer", "operator", "customer_creator","user_creator");
         seed_roles.forEach(s -> {
             if (
                     roles.stream().noneMatch(role -> Objects.equals(role.getName(), s))
@@ -189,7 +212,7 @@ public class ApplicationConfig {
                             .password(passwordEncoder().encode(adminPassword))
                             .roles(
                                     List.of(
-                                            Role.builder().id(3).build(),// account_creator
+                                            Role.builder().id(3).build(),// customer_creator
                                             Role.builder().id(4).build() // user_creator
                                     )
                             )

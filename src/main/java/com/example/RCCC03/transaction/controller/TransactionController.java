@@ -18,6 +18,10 @@ import java.util.Map;
 public class TransactionController {
     private final TransactionService transactionService;
 
+    @GetMapping("/all")
+    public BasicResponse<List<Transaction>> allByUser() {
+        return transactionService.allByUser();
+    }
     @GetMapping("/all/{account_number}")
     public BasicResponse<List<Transaction>> all(@PathVariable long account_number) {
         return transactionService.all(
