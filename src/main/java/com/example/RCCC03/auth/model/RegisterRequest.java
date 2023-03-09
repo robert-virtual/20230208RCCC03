@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -15,7 +16,13 @@ import java.util.List;
 public class RegisterRequest {
 
     private String email;
-    private List<Role> roles;
+    private List<Role> roles = new ArrayList<>();
     private long customer_id;
+    public void addRole(Role role) {
+        roles.add(role);
+    }
+    public void addRoles(List<Role> roles) {
+        roles.addAll(roles);
+    }
 
 }

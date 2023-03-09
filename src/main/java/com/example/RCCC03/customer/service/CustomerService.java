@@ -144,7 +144,7 @@ public class CustomerService {
             ).getData();
             customer.setUsers(List.of(user));
         } catch (Exception e) {
-            return BasicResponse.<Customer>builder().error("could not create user for the given customer").build();
+            return BasicResponse.<Customer>builder().error("could not create user for the given customer: "+e.getMessage()).build();
         }
         return BasicResponse.<Customer>builder().data(customer).build();
     }

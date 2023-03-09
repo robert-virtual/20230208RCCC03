@@ -234,7 +234,7 @@ public class AuthService {
                             .build();
         }
         String strongPassword = generateStrongPassword();
-        var user = User.builder()
+        User user = User.builder()
                 .customerId(registerRequest.getCustomer_id())
                 .email(registerRequest.getEmail())
                 .roles(registerRequest.getRoles())

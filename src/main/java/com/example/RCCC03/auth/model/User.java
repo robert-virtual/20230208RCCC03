@@ -23,20 +23,25 @@ import java.util.List;
 public class User implements UserDetails {
 
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
-           joinColumns = @JoinColumn(name = "user_id",referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id",referencedColumnName = "id")
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
     )
     private List<Role> roles = new ArrayList<>();
-    public void addRole(Role role){
+
+    public void addRole(Role role) {
         roles.add(role);
     }
+    public void addRoles(List<Role> _roles) {
+        if (roles == null) roles = new ArrayList<>();
+        roles.addAll(_roles);
+    }
+
     private String otp;
     private LocalDateTime otp_expires_at;
     @JsonIgnore
@@ -56,10 +61,11 @@ public class User implements UserDetails {
     private LocalDateTime updated_at;
     private LocalDateTime last_login;
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        return roles.stream().map(role->new SimpleGrantedAuthority(role.getName())).toList();
+        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList();
     }
 
     @Override
