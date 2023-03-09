@@ -3,6 +3,7 @@ package com.example.RCCC03.customer.controller;
 import com.example.RCCC03.account.model.Account;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
+import com.example.RCCC03.customer.model.ProviderType;
 import com.example.RCCC03.customer.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -69,6 +70,10 @@ public class CustomerController {
     @GetMapping("/employee")
     public BasicResponse<List<Customer>> getEmployees() {
         return customerService.getEmployees();
+    }
+    @GetMapping("/types")
+    public BasicResponse<List<ProviderType>> getCustomerTypes() {
+        return customerService.getCustomerTypes();
     }
 
     @PostMapping("/employee")

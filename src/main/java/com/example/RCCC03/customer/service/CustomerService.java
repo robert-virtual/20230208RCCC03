@@ -10,7 +10,9 @@ import com.example.RCCC03.audit.AuditLogService;
 import com.example.RCCC03.auth.service.AuthService;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
+import com.example.RCCC03.customer.model.ProviderType;
 import com.example.RCCC03.customer.repository.CustomerRepository;
+import com.example.RCCC03.customer.repository.ProviderTypeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +28,7 @@ public class CustomerService {
     private final AuditLogService auditLogService;
     private final AuthService authService;
     private final CustomerRepository customerRepo;
+    private final ProviderTypeRepository providerTypeRepo;
     private final AccountRepository accountRepo;
     private final UserRepository userRepo;
 
@@ -167,4 +170,7 @@ public class CustomerService {
     }
 
 
+    public BasicResponse<List<ProviderType>> getCustomerTypes() {
+        return BasicResponse.<List<ProviderType>>builder().data(providerTypeRepo.findAll()).build();
+    }
 }
