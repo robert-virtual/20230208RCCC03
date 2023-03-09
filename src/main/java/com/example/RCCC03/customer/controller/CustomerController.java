@@ -18,6 +18,11 @@ import java.util.Map;
 public class CustomerController {
     private final CustomerService customerService;
 
+    /**
+     * Returns a object containing the following properties:
+     * - data: Object of type Customer
+     * @return Object containing a data or an error property
+     */
     @GetMapping("/me")
     public BasicResponse<Customer> me() {
         return customerService.me();
