@@ -3,6 +3,7 @@ package com.example.RCCC03.customer.model;
 import com.example.RCCC03.account.model.Account;
 import com.example.RCCC03.auth.model.User;
 import com.example.RCCC03.provider.model.Provider;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +39,7 @@ public class Customer {
     private String dni;
 
     @Column(nullable = true,name = "is_company")
+    @JsonProperty("is_company")
     private boolean isCompany;
     private String phone;
     private String address_1;

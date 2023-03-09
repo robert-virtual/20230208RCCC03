@@ -4,7 +4,6 @@ import com.example.RCCC03.account.model.Account;
 import com.example.RCCC03.config.BasicResponse;
 import com.example.RCCC03.customer.model.Customer;
 import com.example.RCCC03.customer.service.CustomerService;
-import jakarta.persistence.Basic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
