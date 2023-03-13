@@ -21,6 +21,12 @@ public class AccountService {
     private final AccountRepository accountRepo;
     private final UserRepository userRepo;
 
+    /**
+     * Creates an account if the customer_id inside the body is not valid the account the assign
+     * to the user requesting the action
+     * @param body
+     * @return BasicResponse<Account>
+     */
     public BasicResponse<Account> create(Account body) {
         if (body.getCustomerId() <= 0){
            String userEmail  = SecurityContextHolder.getContext().getAuthentication().getName();
